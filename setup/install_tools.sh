@@ -20,6 +20,7 @@ homebrew_packages=(
   'glide'
   'groovy'
   'python'
+  'bash-completion'
 )
 
 homebrew_casks=(
@@ -91,6 +92,13 @@ if true; then
 #defaults write com.apple.finder AppleShowAllFiles TRUE
 if [ "YES" != "$(defaults read com.apple.finder AppleShowAllFiles)" ]; then
   defaults write com.apple.finder AppleShowAllFiles YES
+  killall Finder
+fi
+
+#echo "Setting finder to show paths in titlebar!"
+#defaults write com.apple.finder _FXShowPosixPathInTitle -bool YES
+if [ "YES" != "$(defaults read com.apple.finder _FXShowPosixPathInTitle)" ]; then
+  defaults write com.apple.finder _FXShowPosixPathInTitle YES
   killall Finder
 fi
 
