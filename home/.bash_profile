@@ -4,6 +4,8 @@ MAC_SETTINGS_BP_FILE="$REPOS_BASE_DIR/mac_settings/home/.bash_profile"
 MAC_SETTINGS_INSTALL_TOOLS_FILE="$REPOS_BASE_DIR/mac_settings/setup/install_tools.sh"
 UTILITY_SCRIPTS_GITDIR_FILE="$REPOS_BASE_DIR/utility_scripts/gitdir.sh"
 
+alias cdrepos="cd $REPOS_BASE_DIR"
+
 # Open mac_settings project bash profile file
 function vibp {
   vim $MAC_SETTINGS_BP_FILE
