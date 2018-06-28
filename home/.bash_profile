@@ -37,6 +37,10 @@ function cpgitdir {
   chmod +x gitdir
 }
 
+function mknote {
+    touch "$(date '+%Y%m%d')-notes.txt"
+}
+
 # Create a newly stubbed bash script file
 function newsh {
   echo "#!/usr/bin/env bash" > new.sh
