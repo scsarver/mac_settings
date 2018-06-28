@@ -9,7 +9,7 @@
 
 homebrew_packages=(
   'packer'
-  #'terraform'
+  'terraform'
   'awscli'
   'git'
   'tree'
