@@ -1,6 +1,7 @@
 #Note this file needs to be set based on the cloned location of the repo.
 REPOS_BASE_DIR="/Users/$(whoami)/Documents/repos"
 MAC_SETTINGS_BP_FILE="$REPOS_BASE_DIR/mac_settings/home/.bash_profile"
+MAC_SETTINGS_INSTALL_TOOLS_FILE="$REPOS_BASE_DIR/mac_settings/setup/install_tools.sh"
 UTILITY_SCRIPTS_GITDIR_FILE="$REPOS_BASE_DIR/utility_scripts/gitdir.sh"
 
 # Open mac_settings project bash profile file
@@ -16,6 +17,16 @@ function cpbp {
 # Source the users bash profile file
 function sourcebp {
   source ~/.bash_profile
+}
+
+# Open mac_settings project install_tools.sh script for editing
+function viit {
+  vi $MAC_SETTINGS_INSTALL_TOOLS_FILE
+}
+
+# Run the install_tools.sh script in the mac_settings project
+function doit {
+  bash -c $MAC_SETTINGS_INSTALL_TOOLS_FILE
 }
 
 # Copy the gitdir.sh script to the current directory
