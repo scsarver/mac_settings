@@ -30,7 +30,7 @@ function doit {
 }
 
 # Copy the gitdir.sh script to the current directory
-function getgitdir {
+function cpgitdir {
   cp $UTILITY_SCRIPTS_GITDIR_FILE gitdir
   chmod +x gitdir
 }
