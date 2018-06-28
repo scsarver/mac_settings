@@ -149,40 +149,40 @@ done
 #Need to unlink and relink kegs
 #brew list -1 | while read line; do brew unlink $line; brew link --force $line; done
 
-echo " "
-echo "Installing python2 pips..."
-for pip in "${python2_pips[@]}"
-do
-  echo "Installing pip2: $pip"
-  pip2 install "$pip"
-done
+#echo " "
+#echo "Installing python2 pips..."
+#for pip in "${python2_pips[@]}"
+#do
+#  echo "Installing pip2: $pip"
+#  pip2 install "$pip"
+#done
 
-echo " "
-echo "Installing python3 pips..."
-for pip in "${python3_pips[@]}"
-do
-  echo "Installing pip3: $pip"
-  pip3 install "$pip"
-done
+#echo " "
+#echo "Installing python3 pips..."
+#for pip in "${python3_pips[@]}"
+#do
+#  echo "Installing pip3: $pip"
+#  pip3 install "$pip"
+#done
 
-echo " "
-echo "Checking for aws crednetials file: /Users/$(whoami)/.aws"
-if [[ ! -d "/Users/$(whoami)/.aws" ]]; then
-  echo "Make /Users/$(whoami)/.aws dir!"
-  mkdir "/Users/$(whoami)/.aws"
+#echo " "
+#echo "Checking for aws crednetials file: /Users/$(whoami)/.aws"
+#if [[ ! -d "/Users/$(whoami)/.aws" ]]; then
+#  echo "Make /Users/$(whoami)/.aws dir!"
+#  mkdir "/Users/$(whoami)/.aws"
+#fi
+#if [[ ! -f "/Users/$(whoami)/.aws/credentials" ]]; then
+#  echo "Make /Users/$(whoami)/.aws/ credentials!"
+#  echo "[default]" > ~/.aws/credentials
+#  echo "aws_access_key_id =" >> ~/.aws/credentials
+#  echo "aws_secret_access_key =" >> ~/.aws/credentials
+#fi
+
 fi
-if [[ ! -f "/Users/$(whoami)/.aws/credentials" ]]; then
-  echo "Make /Users/$(whoami)/.aws/ credentials!"
-  echo "[default]" > ~/.aws/credentials
-  echo "aws_access_key_id =" >> ~/.aws/credentials
-  echo "aws_secret_access_key =" >> ~/.aws/credentials
-fi
 
-fi
-
-echo "NOTE: Terraform was removed from the brew installs as I could not find version 0.9.11"
-echo "  the following file was installed: https://releases.hashicorp.com/terraform/0.9.11/terraform_0.9.11_darwin_amd64.zip"
-echo "  it was extracted and moved to /usr/local/bin - mv ~/Downloads/terraform /usr/local/bin/terraform"
+#echo "NOTE: Terraform was removed from the brew installs as I could not find version 0.9.11"
+#echo "  the following file was installed: https://releases.hashicorp.com/terraform/0.9.11/terraform_0.9.11_darwin_amd64.zip"
+#echo "  it was extracted and moved to /usr/local/bin - mv ~/Downloads/terraform /usr/local/bin/terraform"
 echo " "
 
 echo "Completed!"
