@@ -5,6 +5,10 @@ MAC_SETTINGS_INSTALL_TOOLS_FILE="$REPOS_BASE_DIR/mac_settings/setup/install_tool
 UTILITY_SCRIPTS_GITDIR_FILE="$REPOS_BASE_DIR/utility_scripts/gitdir.sh"
 
 alias cdrepos="cd $REPOS_BASE_DIR"
+alias assume="unset AWS_SHARED_CREDENTIALS_FILE; ./assume_role.sh"
+alias setcreds="export AWS_SHARED_CREDENTIALS_FILE=$(ls | grep awscreds)"
+alias unsetcreds="unset AWS_SHARED_CREDENTIALS_FILE"
+alias checkcreds="printenv | grep AWS_SHARED_CREDENTIALS_FILE"
 
 # Open mac_settings project bash profile file
 function vibp {

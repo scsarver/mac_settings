@@ -34,6 +34,8 @@ homebrew_casks=(
   'wireshark'
   'java'
   'meld'
+  'spotify'
+  'docker'
 )
 
 homebrew_taps=(
