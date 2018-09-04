@@ -21,6 +21,10 @@ homebrew_packages=(
   'groovy'
   'python'
   'bash-completion'
+  'curl'
+  'libressl'
+  'terraforming'
+  'ansible'
 )
 
 homebrew_casks=(

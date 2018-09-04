@@ -4,11 +4,17 @@ MAC_SETTINGS_BP_FILE="$REPOS_BASE_DIR/mac_settings/home/.bash_profile"
 MAC_SETTINGS_INSTALL_TOOLS_FILE="$REPOS_BASE_DIR/mac_settings/setup/install_tools.sh"
 UTILITY_SCRIPTS_GITDIR_FILE="$REPOS_BASE_DIR/utility_scripts/gitdir.sh"
 
+alias ll="ls -la"
+alias getweather="curl -4 http://wttr.in/chicago"
 alias cdrepos="cd $REPOS_BASE_DIR"
-alias assume="unset AWS_SHARED_CREDENTIALS_FILE; ./assume_role.sh"
+alias assume="unset AWS_SHARED_CREDENTIALS_FILE; /Users/$(whoami)/Documents/repos/utility_scripts/aws-assume-role/assume_role.sh --adid=$(whoami) --region=us-east-1 --role=AdminRole --accounts=xxxxxxxxxxxx;export AWS_SHARED_CREDENTIALS_FILE=$(ls | grep awscreds)"
+alias assume2="unset AWS_SHARED_CREDENTIALS_FILE; /Users/$(whoami)/Documents/repos/utility_scripts/aws-assume-role/assume_role.sh --adid=$(whoami) --region=us-east-1 --role= AdminRole --accounts= xxxxxxxxxxxx;export AWS_SHARED_CREDENTIALS_FILE=$(ls | grep awscreds)"
 alias setcreds="export AWS_SHARED_CREDENTIALS_FILE=$(ls | grep awscreds)"
 alias unsetcreds="unset AWS_SHARED_CREDENTIALS_FILE"
 alias checkcreds="printenv | grep AWS_SHARED_CREDENTIALS_FILE"
+alias sshbastion="ssh -i ~/.ssh/id_rsa ubuntu@SOMEIPADDRESSS"
+alias whatsmyip="dig +short myip.opendns.com @resolver1.opendns.com"
+alias rmtfinit="rm -rf .terraform;unset AWS_SHARED_CREDENTIALS_FILE;rm awscreds*;rm *tfstate*"
 
 # Open mac_settings project bash profile file
 function vibp {
@@ -61,6 +67,7 @@ function newsh {
 #https://www.cyberciti.biz/tips/howto-linux-unix-bash-shell-setup-prompt.html
 PS1="\D{%Y.%m.%d-%H:%M:%S}|\w:"
 export EDITOR=vim
+export PATH="/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:$PATH"
 
 #For bash-completion
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
