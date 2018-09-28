@@ -24,7 +24,6 @@ homebrew_packages=(
   'curl'
   'libressl'
   'terraforming'
-  'ansible'
 )
 
 homebrew_casks=(
@@ -62,6 +61,7 @@ python2_pips=(
   'demjson'
   'yamllint'
   'ruamel.yaml'
+  'ansible'
 )
 
 python3_pips=(

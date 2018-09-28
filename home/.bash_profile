@@ -14,7 +14,22 @@ alias unsetcreds="unset AWS_SHARED_CREDENTIALS_FILE"
 alias checkcreds="printenv | grep AWS_SHARED_CREDENTIALS_FILE"
 alias sshbastion="ssh -i ~/.ssh/id_rsa ubuntu@SOMEIPADDRESSS"
 alias whatsmyip="dig +short myip.opendns.com @resolver1.opendns.com"
-alias rmtfinit="rm -rf .terraform;unset AWS_SHARED_CREDENTIALS_FILE;rm awscreds*;rm *tfstate*"
+
+alias tfinitrm="rm -rf .terraform;unset AWS_SHARED_CREDENTIALS_FILE;rm awscreds*;rm *tfstate*"
+
+function tfdo {
+  local -r tf_do_current_dir="${PWD##*/}"
+  local -r tf_do_action=$1
+  local tf_do_var_file="terraform.tfvars"
+  local tf_do_cmd_switch="var-file"
+  if [ "init" == "$1" ]; then
+    tf_do_var_file="backend.tfvars"
+    tf_do_cmd_switch="backend-config"
+  fi
+  echo "tfdo "$1" -$tf_do_cmd_switch=../env/$2/$tf_do_var_file" "-$tf_do_cmd_switch=../env/$2/$tf_do_current_dir/$tf_do_var_file"
+  terraform "$1" "-$tf_do_cmd_switch=../env/$2/$tf_do_var_file" "-$tf_do_cmd_switch=../env/$2/$tf_do_current_dir/$tf_do_var_file"
+}
+
 
 # Open mac_settings project bash profile file
 function vibp {
