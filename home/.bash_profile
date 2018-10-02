@@ -5,15 +5,22 @@ MAC_SETTINGS_INSTALL_TOOLS_FILE="$REPOS_BASE_DIR/mac_settings/setup/install_tool
 UTILITY_SCRIPTS_GITDIR_FILE="$REPOS_BASE_DIR/utility_scripts/gitdir.sh"
 
 alias ll="ls -la"
+alias untar='tar -zxvf '
+alias speed='speedtest-cli --server 2406 --simple'
+alias whatsmyip="dig +short myip.opendns.com @resolver1.opendns.com"
+alias ipe='curl ipinfo.io/ip'
+alias ipi='ipconfig getifaddr en0'
 alias getweather="curl -4 http://wttr.in/chicago"
+
 alias cdrepos="cd $REPOS_BASE_DIR"
 alias assume="unset AWS_SHARED_CREDENTIALS_FILE; /Users/$(whoami)/Documents/repos/utility_scripts/aws-assume-role/assume_role.sh --adid=$(whoami) --region=us-east-1 --role=AdminRole --accounts=xxxxxxxxxxxx;export AWS_SHARED_CREDENTIALS_FILE=$(ls | grep awscreds)"
 alias assume2="unset AWS_SHARED_CREDENTIALS_FILE; /Users/$(whoami)/Documents/repos/utility_scripts/aws-assume-role/assume_role.sh --adid=$(whoami) --region=us-east-1 --role= AdminRole --accounts= xxxxxxxxxxxx;export AWS_SHARED_CREDENTIALS_FILE=$(ls | grep awscreds)"
+alias awsacctalias="aws iam list-account-aliases | jq -r \".AccountAliases[0]\""
+
 alias setcreds="export AWS_SHARED_CREDENTIALS_FILE=$(ls | grep awscreds)"
 alias unsetcreds="unset AWS_SHARED_CREDENTIALS_FILE"
 alias checkcreds="printenv | grep AWS_SHARED_CREDENTIALS_FILE"
 alias sshbastion="ssh -i ~/.ssh/id_rsa ubuntu@SOMEIPADDRESSS"
-alias whatsmyip="dig +short myip.opendns.com @resolver1.opendns.com"
 
 alias tfinitrm="rm -rf .terraform;unset AWS_SHARED_CREDENTIALS_FILE;rm awscreds*;rm *tfstate*"
 
