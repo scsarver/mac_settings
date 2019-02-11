@@ -24,6 +24,10 @@ homebrew_packages=(
   'curl'
   'libressl'
   'terraforming'
+  'gpg'
+  'pipenv'
+  'certbot'
+  'postgres'
 )
 
 homebrew_casks=(
@@ -39,6 +43,7 @@ homebrew_casks=(
   'meld'
   'spotify'
   'docker'
+  'dbeaver-community'
 )
 
 homebrew_taps=(
@@ -62,6 +67,7 @@ python2_pips=(
   'yamllint'
   'ruamel.yaml'
   'ansible'
+  'pyhcl'
 )
 
 python3_pips=(
@@ -80,6 +86,7 @@ python3_pips=(
   'demjson'
   'yamllint'
   'ruamel.yaml'
+  'pyhcl'
 )
 
 set +e

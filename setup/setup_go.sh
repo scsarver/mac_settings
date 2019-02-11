@@ -28,3 +28,13 @@ do
     mkdir -p "$go_dir/$dir"
   fi
 done
+
+echo "Be sure to set go on the PATH in your bash profile example:"
+cat <<EOM
+if [ ! "" == "$(which go)" ]; then
+  export PATH=$PATH:$(go env GOPATH)/bin
+  export GOPATH=$(go env GOPATH)
+fi
+EOM
+
+echo "More go questions start here:  https://golang.org/doc/code.html"
