@@ -200,6 +200,17 @@ fi
 #echo "NOTE: Terraform was removed from the brew installs as I could not find version 0.9.11"
 #echo "  the following file was installed: https://releases.hashicorp.com/terraform/0.9.11/terraform_0.9.11_darwin_amd64.zip"
 #echo "  it was extracted and moved to /usr/local/bin - mv ~/Downloads/terraform /usr/local/bin/terraform"
+
+
+echo "Install SSM Manager plugin - UNCOMMENT!!!"
+# Reference: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+# curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac/sessionmanager-bundle.zip" -o "sessionmanager-bundle.zip"
+# unzip sessionmanager-bundle.zip
+# sudo ./sessionmanager-bundle/install -i /usr/local/sessionmanagerplugin -b /usr/local/bin/session-manager-plugin
+# #Output should match: "The Session Manager plugin is installed successfully. Use the AWS CLI to start a session."
+# session-manager-plugin
+
+
 echo " "
 
 echo "Completed!"
