@@ -58,11 +58,10 @@ alias checkcreds="printenv | grep AWS_SHARED_CREDENTIALS_FILE"
 alias unsetprofile="unset AWS_PROFILE"
 alias checkprofile="printenv | grep AWS_PROFILE"
 alias checkaws="printenv | grep AWS_"
+alias awswhoami="aws iam list-account-aliases | jq -r \".AccountAliases[0]\";aws sts get-caller-identity"
 
 alias sshbastion="ssh -i ~/.ssh/id_rsa ubuntu@SOMEIPADDRESSS"
-
 alias tfinitrm="rm -rf .terraform;unset AWS_SHARED_CREDENTIALS_FILE;rm awscreds*;rm *tfstate*"
-alias awswhoami="aws sts get-caller-identity"
 
 function tfdo_old {
   local -r tf_do_current_dir="${PWD##*/}"
