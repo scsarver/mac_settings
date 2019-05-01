@@ -30,6 +30,7 @@ homebrew_packages=(
   'postgres'
   'telnet'
   'speedtest-cli'
+  'googler'
 )
 
 homebrew_casks=(
