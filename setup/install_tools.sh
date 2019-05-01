@@ -28,6 +28,7 @@ homebrew_packages=(
   'pipenv'
   'certbot'
   'postgres'
+  'telnet'
 )
 
 homebrew_casks=(
@@ -44,6 +45,7 @@ homebrew_casks=(
   'spotify'
   'docker'
   'dbeaver-community'
+  'authy'
 )
 
 homebrew_taps=(
