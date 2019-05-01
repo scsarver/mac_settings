@@ -29,6 +29,7 @@ homebrew_packages=(
   'certbot'
   'postgres'
   'telnet'
+  'speedtest-cli'
 )
 
 homebrew_casks=(
