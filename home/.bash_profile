@@ -11,6 +11,7 @@ ONELOGIN_ODIN_CREDS_LOCATION="$REPOS_BASE_DIR/opploans/opploans-odin/odin-tools/
 ONELOGIN_ODIN_ASSUME_SCRIPT_NAME="onelogin-aws-assume-role.py"
 
 . "$MAC_SETTINGS_HOME/.functions/.file_functions"
+. "$MAC_SETTINGS_HOME/.functions/.date_functions"
 
 alias grepc="grep --color=auto"
 alias ll="ls -la"
