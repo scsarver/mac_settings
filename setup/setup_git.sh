@@ -20,3 +20,8 @@ git config --list
 #echo "login $user_name">> $home_dir/.netrc
 #echo "password REPLACE_ME">> $home_dir/.netrc
 #echo "protocol https">> $home_dir/.netrc
+
+
+#TODO Set up useful git aliases
+# https://coderwall.com/p/euwpig/a-better-git-log
+# https://medium.com/the-andela-way/exploring-the-git-log-command-9117b9ff3c2c
