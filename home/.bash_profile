@@ -2,8 +2,8 @@
 REPOS_BASE_DIR="/Users/$(whoami)/Documents/repos"
 
 MAC_SETTINGS_HOME="$REPOS_BASE_DIR/mac_settings/home"
-MAC_SETTINGS_BP_FILE="$REPOS_BASE_DIR/mac_settings/home/.bash_profile"
-MAC_SETTINGS_INSTALL_TOOLS_FILE="$REPOS_BASE_DIR/mac_settings/setup/install_tools.sh"
+MAC_SETTINGS_SETUP="$REPOS_BASE_DIR/mac_settings/setup"
+
 UTILITY_SCRIPTS_GITDIR_FILE="$REPOS_BASE_DIR/utility_scripts/gitdir"
 ONELOGIN_CREDS_LOCATION="$REPOS_BASE_DIR/onelogin-python-aws-assume-role/src/onelogin/aws-assume-role"
 
@@ -206,12 +206,12 @@ function cdiac {
 
 # Open mac_settings project bash profile file
 function vibp {
-  vim $MAC_SETTINGS_BP_FILE
+  vim "$MAC_SETTINGS_HOME/.bash_profile"
 }
 
 # Copy mac settings project bash profile file into the users home directory
 function cpbp {
-  cp $MAC_SETTINGS_BP_FILE ~/.bash_profile
+  cp "$MAC_SETTINGS_HOME/.bash_profile" ~/.bash_profile
 }
 
 # Source the users bash profile file
@@ -221,12 +221,12 @@ function sourcebp {
 
 # Open mac_settings project install_tools.sh script for editing
 function viit {
-  vi $MAC_SETTINGS_INSTALL_TOOLS_FILE
+  vi "$MAC_SETTINGS_SETUP/install_tools.sh"
 }
 
 # Run the install_tools.sh script in the mac_settings project
 function doit {
-  bash -c $MAC_SETTINGS_INSTALL_TOOLS_FILE
+  bash -c "$MAC_SETTINGS_SETUP/install_tools.sh"
 }
 
 # Copy the gitdir.sh script to the current directory
