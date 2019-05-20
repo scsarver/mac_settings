@@ -31,6 +31,7 @@ homebrew_packages=(
   'telnet'
   'speedtest-cli'
   'googler'
+  'oath-toolkit'
 )
 
 homebrew_casks=(
