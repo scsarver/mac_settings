@@ -49,6 +49,7 @@ homebrew_casks=(
   'docker'
   'dbeaver-community'
   'authy'
+  'meld'
 )
 
 homebrew_taps=(
