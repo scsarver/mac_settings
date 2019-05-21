@@ -10,8 +10,10 @@ ONELOGIN_CREDS_LOCATION="$REPOS_BASE_DIR/onelogin-python-aws-assume-role/src/one
 ONELOGIN_ODIN_CREDS_LOCATION="$REPOS_BASE_DIR/opploans/opploans-odin/odin-tools/onelogin"
 ONELOGIN_ODIN_ASSUME_SCRIPT_NAME="onelogin-aws-assume-role.py"
 
-. "$MAC_SETTINGS_HOME/.functions/.file_functions"
-. "$MAC_SETTINGS_HOME/.functions/.date_functions"
+# for file in "$(find $MAC_SETTINGS_HOME/.functions -type f -maxdepth 1 -name '*.*_functions' -print -quit)"; do
+for file in $(find $MAC_SETTINGS_HOME/.functions -type f -name '*.*_functions'); do
+  source "$file";
+done
 
 alias grepc="grep --color=auto"
 alias ll="ls -la"
@@ -32,6 +34,7 @@ alias cdrepos="cd $REPOS_BASE_DIR"
 alias cdodin="cd $REPOS_BASE_DIR/opploans/opploans-odin"
 alias cdonelog="cd $ONELOGIN_CREDS_LOCATION"
 alias cdproto="cd $REPOS_BASE_DIR/prototype"
+alias cdop="cd $REPOS_BASE_DIR/opploans/opploans"
 
 alias awsacctalias="aws iam list-account-aliases | jq -r \".AccountAliases[0]\""
 alias awsgetcaller="aws sts get-caller-identity"
@@ -45,6 +48,7 @@ function awsoneloginset {
     export AWS_SHARED_CREDENTIALS_FILE="$(cat $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json | jq -r '.aws_shared_credentials_file')"
     export AWS_PROFILE="$(cat $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json | jq -r '.aws_profile')"
     export AWS_REGION="$(cat $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json | jq -r '.aws_region')"
+    export AWS_DEFAULT_REGION="$AWS_REGION"
 }
 
 function awssetcreds {
@@ -59,6 +63,26 @@ function setcreds {
     export AWS_SHARED_CREDENTIALS_FILE="$(ls | grep awscreds)"
 }
 
+function unsetaws {
+  #https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_SECRET_ACCESS_KEY
+  unset AWS_SESSION_TOKEN
+  unset AWS_DEFAULT_REGION
+  unset AWS_DEFAULT_OUTPUT
+  unset AWS_DEFAULT_PROFILE
+  unset AWS_CA_BUNDLE
+  unset AWS_SHARED_CREDENTIALS_FILE
+  unset AWS_CONFIG_FILE
+  #https://docs.aws.amazon.com/cli/latest/topic/config-vars.html
+  unset AWS_PROFILE
+  unset AWS_METADATA_SERVICE_TIMEOUT
+  unset AWS_METADATA_SERVICE_NUM_ATTEMPTS
+  #I think this is remanant of usage thart was supposed to be looking at AWS_DEFAULT_REGION yet here it lives on :(
+  unset AWS_REGION
+}
+
+
 alias unsetcreds="unset AWS_SHARED_CREDENTIALS_FILE"
 alias checkcreds="printenv | grep AWS_SHARED_CREDENTIALS_FILE"
 alias unsetprofile="unset AWS_PROFILE"
@@ -68,126 +92,6 @@ alias awswhoami="aws iam list-account-aliases | jq -r \".AccountAliases[0]\";aws
 
 alias sshbastion="ssh -i ~/.ssh/id_rsa ubuntu@SOMEIPADDRESSS"
 alias tfinitrm="rm -rf .terraform;unset AWS_SHARED_CREDENTIALS_FILE;rm awscreds*;rm *tfstate*"
-
-function tfdo_old {
-  local -r tf_do_current_dir="${PWD##*/}"
-  local -r tf_do_action=$1
-  # local tf_do_var_file="terraform.tfvars"
-  local tf_do_var_file="variables.tfvars"
-  local tf_do_cmd_switch="var-file"
-  if [ "init" == "$1" ]; then
-    rm -rf .terraform
-    tf_do_var_file="backend.tfvars"
-    tf_do_cmd_switch="backend-config"
-  fi
-  local base_var_file_cmd="-$tf_do_cmd_switch=../env/$2/$tf_do_var_file"
-  local nested_var_file_cmd=""
-  if [ -f "../env/$2/$tf_do_current_dir/$tf_do_var_file" ]; then
-    local nested_var_file_cmd="-$tf_do_cmd_switch=../env/$2/$tf_do_current_dir/$tf_do_var_file"
-    echo "tfdo_old "$1" $base_var_file_cmd" "$nested_var_file_cmd"
-    terraform "$1" "$base_var_file_cmd" "$nested_var_file_cmd"
-  else
-    echo "tfdo_old "$1" $base_var_file_cmd"
-    terraform "$1" "$base_var_file_cmd"
-  fi
-}
-
-
-# The tfdo function is used to encapsulate the command line parameters to include the correct tfvars files in the correct order based on established patterns matching:
-# - ${github_repo}/iac/env/${github_repo_tolder} is where terraform is executed from
-# - ${github_repo_path} is always prefixed with iac and looks like iac/${github_repo_tolder}
-# - ${github_repo}/iac/env/${github_repo_tolder} has a backend.tfvars file
-# - ${github_repo}/iac/env/${github_repo_tolder} optionally has a variables.tfvars
-#
-function tfdo {
-  local -r tf_do_current_dir="${PWD##*/}"
-  local releative_path="../../../${PWD##*/}"
-  local -r tf_do_action=$1
-  local tf_do_var_file="variables.tfvars"
-  local tf_do_cmd_switch="var-file"
-  if [ "init" == "$1" ]; then
-    #rm -rf .terraform
-    tf_do_var_file="backend.tfvars"
-    tf_do_cmd_switch="backend-config"
-  fi
-  local base_var_file_cmd="-$tf_do_cmd_switch=../$tf_do_var_file"
-  if [ "apply" == "$1" ] && [ "-aa" == "$2" ]; then
-    local base_var_file_cmd="-auto-approve $base_var_file_cmd"
-  fi
-  local nested_var_file_cmd=""
-  if [ -f "$tf_do_var_file" ]; then
-    local nested_var_file_cmd="-$tf_do_cmd_switch=$tf_do_var_file"
-    echo "tfdo - terraform $1 $base_var_file_cmd $nested_var_file_cmd $releative_path"
-    terraform "$1" $base_var_file_cmd $nested_var_file_cmd $releative_path
-  else
-    echo "tfdo - terraform $1 $base_var_file_cmd $releative_path"
-    terraform "$1" $base_var_file_cmd $releative_path
-  fi
-}
-
-# Utility function to quickly shift between the base tolder and environment directories
-function tfenv {
-  if [ "" == "$1" ]; then
-    echo "Environment parameter is missing!"
-  else
-    if [ -d "../env/$1" ] && [ -d "../env/$1/${PWD##*/}" ]; then
-      cd "../env/$1/${PWD##*/}"
-    else
-      echo "The path: ../env/$1/${PWD##*/} does not exist!"
-    fi
-  fi
-}
-
-# Utility function to quickly shift between the base tolder and environment directories
-function tfbase {
-  if [ -d "../../../${PWD##*/}" ]; then
-    cd "../../../${PWD##*/}"
-  else
-    echo "The path: ../env/iac/$1/${PWD##*/} does not exist!"
-  fi
-}
-
-function tfunlock {
-  REMOTE_STATE_DYNAMODB_TABLE=`cat ../backend.tfvars | grep dynamodb_table | awk -F' ' '{print$3}' | sed 's/\(.*\)"/\1/' | sed 's/^"//'`
-  REMOTE_STATE_BUCKET=`cat ../backend.tfvars | grep bucket | awk -F' ' '{print$3}' | sed 's/\(.*\)"/\1/' | sed 's/^"//'`
-  REMOTE_STATE_REGION=`cat ../backend.tfvars | grep region | awk -F' ' '{print$3}' | sed 's/\(.*\)"/\1/' | sed 's/^"//'`
-  REMOTE_STATE_KEY=`cat backend.tfvars | grep key | awk -F' ' '{print$3}' | sed 's/\(.*\)"/\1/' | sed 's/^"//'`
-  DYNAMODB_DELETE_LOCK_PAYLOAD="{\"LockID\": {\"S\": \"$REMOTE_STATE_BUCKET/$REMOTE_STATE_KEY\"}}"
-  # echo "aws dynamodb get-item --table-name $REMOTE_STATE_DYNAMODB_TABLE --key $DYNAMODB_DELETE_LOCK_PAYLOAD --region $REMOTE_STATE_REGION"
-  aws dynamodb delete-item --table-name "$REMOTE_STATE_DYNAMODB_TABLE" --key "$DYNAMODB_DELETE_LOCK_PAYLOAD" --region "$REMOTE_STATE_REGION"
-}
-
-# This does not seem to work as expected and am commenting out until I have time to dig into it deeper
-# function tfimport {
-#   local releative_path="../../../${PWD##*/}"
-#   local tfimport_var_file="variables.tfvars"
-#   local tfimport_cmd_switch="var-file"
-#   local base_var_file_cmd="-$tfimport_cmd_switch=../$tfimport_var_file"
-#   local base_cmd="terraform import $base_var_file_cmd -config=$releative_path"
-#   # local base_cmd="terraform import $base_var_file_cmd"
-#   if [ -f "$tfimport_var_file" ]; then
-#     local nested_var_file_cmd="-$tfimport_cmd_switch=$tfimport_var_file"
-#     base_cmd="terraform import $base_var_file_cmd $nested_var_file_cmd -config=$releative_path"
-#     # base_cmd="terraform import $base_var_file_cmd $nested_var_file_cmd"
-#   fi
-#
-#   # echo "-----$(pwd)"
-#   # pushd $(pwd)
-#   # echo "-----$releative_path"
-#   # cd "$releative_path"
-#   # echo "-----"
-#   # ls
-#   # echo "-----"
-#   if [ -f "$1" ]; then
-#     while IFS= read -r var
-#     do
-#       echo "-----"
-#       echo "$base_cmd ${var%[|]*} ${var#*[|]}"
-#       `$base_cmd "${var%[|]*}" "${var#*[|]}"`
-#     done < "$1"
-#   fi
-#   # popd
-# }
 
 function cdiac {
     local CURRENT_START_PATH="$(pwd)"
@@ -219,6 +123,12 @@ function sourcebp {
   source ~/.bash_profile
 }
 
+function cpsbp {
+  cp "$MAC_SETTINGS_HOME/.bash_profile" ~/.bash_profile
+  source ~/.bash_profile
+}
+
+
 # Open mac_settings project install_tools.sh script for editing
 function viit {
   vi "$MAC_SETTINGS_SETUP/install_tools.sh"
@@ -247,11 +157,35 @@ function ssmto {
   echo "Using AWS Credentials: $sts_output"
   echo " "
   echo "Searching for instancewith '$1' in the name..."
-  local target="$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$1*" --region "$AWS_REGION")"
+  # local target="$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$1*" --region "$AWS_REGION")"
+  local target="$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$1*")"
   local target_name="$(echo $target| jq -r '.Reservations[0].Instances[]|.Tags[]|select(.Key=="Name")|.Value')"
   target_id="$(echo $target| jq -r '.Reservations[0].Instances[]|.InstanceId')"
   echo "Connection to instance via ssm: [$target_name] - [$target_id]"
-  aws ssm start-session --target "$target_id" --region "$AWS_REGION"
+  # aws ssm start-session --target "$target_id" --region "$AWS_REGION"
+  aws ssm start-session --target "$target_id"
+}
+
+function ssminventory {
+  echo "============================================================"
+  local sts_output=$(aws sts get-caller-identity | jq -r '.Arn')
+  echo "Using AWS Credentials: $sts_output"
+  echo " "
+  echo "Show SSM Ec2 Instance Inventory:"
+  echo " "
+  local result_size="100"
+  # local instance_ids=($(aws ssm get-inventory --max-items "$result_size" --page-size" $result_size" | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
+  local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
+  # NOTE: Here we want to use the pagination api and build the full list before moving on to gettign the ec2 information
+
+  local instance_ids_spaced_list=''
+  for id in ${instance_ids[@]}
+  do
+    instance_ids_spaced_list="$instance_ids_spaced_list${id} "
+  done
+  local describe_output="$(aws ec2 describe-instances --instance-ids $instance_ids_spaced_list)"
+  echo "$describe_output" | jq -r '.Reservations[] | .Instances[] | .Tags[] | select(.Key=="Name") | .Value'
+  echo "============================================================"
 }
 
 

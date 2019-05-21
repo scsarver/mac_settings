@@ -6,3 +6,23 @@ function isotimestamp {
     echo "$(date +%Y%m%d%H%M%S)"
   fi
 }
+
+function convert_iso_to_posix_timestamp {
+  if [ "-p" == "$2" ]; then
+    echo $(date -j -f "%Y.%m.%d-%H:%M:%S" "$1" "+%s")
+  else
+    echo $(date -j -f "%Y%m%d%H%M%S" "$1" "+%s")
+  fi
+}
+
+function posixtimestamp {
+  echo  "$(date +%s)"
+}
+
+function convert_posix_to_iso_timestamp {
+  if [ "-p" == "$2" ]; then
+    echo $(date -j -f "%s" "$1" "+%Y.%m.%d-%H:%M:%S")
+  else
+    echo $(date -j -f "%s" "$1" "+%Y%m%d%H%M%S")
+  fi
+}
