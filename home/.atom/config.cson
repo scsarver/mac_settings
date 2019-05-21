@@ -1,0 +1,22 @@
+"*":
+  "atom-ide-ui":
+    "atom-ide-code-format":
+      formatOnSave: true
+  core:
+    customFileTypes:
+      "source.shell": [
+        "aws_functions"
+        "bash_functions"
+        "date_functions"
+        "file_functions"
+        "git_functions"
+        "terraform_functions"
+        "onelogin_access_functions"
+      ]
+    telemetryConsent: "no"
+  editor:
+    fontSize: 13
+  "exception-reporting":
+    userId: "af6cf274-570a-4ad1-beda-2488723f8827"
+  welcome:
+    showOnStartup: false

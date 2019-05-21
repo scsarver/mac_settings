@@ -23,7 +23,7 @@ function posixtimestamp {
 function convert_posix_to_iso_timestamp {
 
 
-  echo "Investigate something weird with the 3 extra zeros!! - 1558346033000"
+  # echo "Investigate something weird with the 3 extra zeros!! - 1558346033000"
 
   if [ "-p" == "$2" ]; then
     echo $(date -j -f "%s" "$1" "+%Y.%m.%d-%H:%M:%S")

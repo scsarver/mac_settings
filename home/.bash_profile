@@ -15,6 +15,8 @@ for file in $(find $MAC_SETTINGS_HOME/.functions -type f -name '*.*_functions');
   source "$file";
 done
 
+alias atomcfg="vim /Users/$(whoami)/.atom/config.cson"
+
 alias grepc="grep --color=auto"
 alias ll="ls -la"
 alias untar='tar -zxvf '

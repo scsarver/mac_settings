@@ -1,3 +1,4 @@
+
 #Move git functions here
 
 alias gs='git status'
@@ -6,10 +7,20 @@ alias glo='git log --oneline'
 alias gls='git log --stat'
 alias glp="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 
-function gitd {
+function gd {
   local git_status_list_position_index="0"
   local count=0
   git_modified=($(git status | grep modified | awk '{print $2}'))
+  git_modified_selected=''
+  if [ "" != "$1" ]; then
+    if [[ $1 =~ ^-?[0-9]+$ ]]; then
+      git_status_list_position_index="$1"
+    else
+      echo "Not a vailid option for selecting gitd: Showing diff for first change!!!!"
+      echo " "
+    fi
+  fi
+  echo "============================================================"
   echo " "
   echo " "
   echo "gitd - Show index and modified files in git project: ${PWD##*/}"
@@ -18,14 +29,10 @@ function gitd {
     echo "   $count - $modified"
     count=$((count+1))
   done
-  if [ "" != "$1" ]; then
-    if [[ $1 =~ ^-?[0-9]+$ ]]; then
-      git_status_list_position_index="$1"
-    fi
-  fi
   echo " "
   echo "gitd - Showing git diff for file: ${git_modified[$git_status_list_position_index]}"
   echo " "
-  echo "$(git -c color.ui=always diff ${git_modified[$git_status_list_position_index]})" | sed 's/^/  /'
+  echo "$(git -c color.ui=always diff ${git_modified[$git_status_list_position_index]})" | sed 's/^/    /'
   echo " "
+  echo "============================================================"
 }

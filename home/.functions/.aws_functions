@@ -28,12 +28,16 @@ function ssminventory {
   echo " "
   local result_size="100"
   # local instance_ids=($(aws ssm get-inventory --max-items "$result_size" --page-size" $result_size" | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
-  local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
+  #local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
+
+
+  local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .'))
   # NOTE: Here we want to use the pagination api and build the full list before moving on to gettign the ec2 information
 
   local instance_ids_spaced_list=''
   for id in ${instance_ids[@]}
   do
+    echo "$id"
     instance_ids_spaced_list="$instance_ids_spaced_list${id} "
   done
   local describe_output="$(aws ec2 describe-instances --instance-ids $instance_ids_spaced_list)"
