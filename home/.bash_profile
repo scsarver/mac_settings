@@ -10,12 +10,29 @@ ONELOGIN_CREDS_LOCATION="$REPOS_BASE_DIR/onelogin-python-aws-assume-role/src/one
 ONELOGIN_ODIN_CREDS_LOCATION="$REPOS_BASE_DIR/opploans/opploans-odin/odin-tools/onelogin"
 ONELOGIN_ODIN_ASSUME_SCRIPT_NAME="onelogin-aws-assume-role.py"
 
+
+OPENDNS_1="208.67.222.222"
+OPENDNS_2="208.67.220.220"
+CLOUDFLAREDNS_1="1 1.1.1.1"
+CLOUDFLAREDNS_2="1.0.0.1"
+GOOGLE_DNS_1="8.8.8.8"
+GOOGLE_DNS_2="8.8.4.4"
+
+PING_TARGET="$CLOUDFLAREDNS_1"
+alias ping1="ping -c $PING_TARGET"
+alias ping10="ping -c 10 $PING_TARGET"
+
+function resolvedns {
+  curl https://dns.google.com/resolve?name=$1
+}
+
 # for file in "$(find $MAC_SETTINGS_HOME/.functions -type f -maxdepth 1 -name '*.*_functions' -print -quit)"; do
 for file in $(find $MAC_SETTINGS_HOME/.functions -type f -name '*.*_functions'); do
   source "$file";
 done
 
 alias atomcfg="vim /Users/$(whoami)/.atom/config.cson"
+
 
 alias grepc="grep --color=auto"
 alias ll="ls -la"
