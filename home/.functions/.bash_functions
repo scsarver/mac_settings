@@ -204,3 +204,29 @@ cecho(){
 # done;
 
 # for i in {30..49};do echo -e "\033[$i;7mReversed color code $i\033[0m Hello world!";done
+
+
+# https://stackoverflow.com/questions/238073/how-to-add-a-progress-bar-to-a-shell-script
+# Spinner i.e. like a hourglass
+# sp='/-\|'
+# printf ' '
+# while true; do
+#     printf '\b%.1s' "$sp"
+#     sp=${sp#?}${sp%???}
+# done
+
+# sp="/-\|"
+# sc=0
+# spin() {
+#    printf "\b${sp:sc++:1}"
+#    ((sc==${#sp})) && sc=0
+# }
+# endspin() {
+#    printf "\r%s\n" "$@"
+# }
+#
+# until work_done; do
+#    spin
+#    some_work ...
+# done
+# endspin

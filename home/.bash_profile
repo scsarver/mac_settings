@@ -137,7 +137,7 @@ function cpgitdir {
 }
 
 #https://www.cyberciti.biz/tips/howto-linux-unix-bash-shell-setup-prompt.html
-PS1="\D{%Y.%m.%d-%H:%M:%S}|\w:"
+PS1="\033[2m\D{%Y.%m.%d-%H:%M:%S}\033[0m\033[1m|\033[0m\w\033[1m:\033[0m"
 export EDITOR=vim
 export PATH="/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:$PATH"
 
