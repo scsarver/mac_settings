@@ -24,18 +24,6 @@ alias ipe='curl ipinfo.io/ip'
 alias ipi='ipconfig getifaddr en0'
 alias getweather="curl -4 http://wttr.in/chicago"
 
-alias gs='git status'
-alias gb='git branch'
-alias glo='git log --oneline'
-alias gls='git log --stat'
-alias glp="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
-
-alias cdrepos="cd $REPOS_BASE_DIR"
-alias cdodin="cd $REPOS_BASE_DIR/opploans/opploans-odin"
-alias cdonelog="cd $ONELOGIN_CREDS_LOCATION"
-alias cdproto="cd $REPOS_BASE_DIR/prototype"
-alias cdop="cd $REPOS_BASE_DIR/opploans/opploans"
-
 alias awsacctalias="aws iam list-account-aliases | jq -r \".AccountAliases[0]\""
 alias awsgetcaller="aws sts get-caller-identity"
 alias awsoneloginconfig="vim $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json"
@@ -91,22 +79,6 @@ alias checkaws="printenv | grep AWS_"
 alias awswhoami="aws iam list-account-aliases | jq -r \".AccountAliases[0]\";aws sts get-caller-identity"
 
 alias sshbastion="ssh -i ~/.ssh/id_rsa ubuntu@SOMEIPADDRESSS"
-alias tfinitrm="rm -rf .terraform;unset AWS_SHARED_CREDENTIALS_FILE;rm awscreds*;rm *tfstate*"
-
-function cdiac {
-    local CURRENT_START_PATH="$(pwd)"
-    local CURRENT_PATH="${CURRENT_START_PATH##*[/]}"
-    if [[ $CURRENT_START_PATH == *"iac"* ]]; then
-      while [ "iac" != "$CURRENT_PATH" ]
-      do
-        cd ..
-        CURRENT_PATH_TMP="$(pwd)"
-        CURRENT_PATH="${CURRENT_PATH_TMP##*[/]}"
-      done
-    else
-        echo "No iac directory in the current path: $CURRENT_START_PATH"
-    fi
-}
 
 # Open mac_settings project bash profile file
 function vibp {
@@ -144,50 +116,6 @@ function cpgitdir {
   cp $UTILITY_SCRIPTS_GITDIR_FILE gitdir
   chmod +x gitdir
 }
-
-#Install SSM Manager plugin
-# Reference: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
-# curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac/sessionmanager-bundle.zip" -o "sessionmanager-bundle.zip"
-# unzip sessionmanager-bundle.zip
-# sudo ./sessionmanager-bundle/install -i /usr/local/sessionmanagerplugin -b /usr/local/bin/session-manager-plugin
-# #Output should match: "The Session Manager plugin is installed successfully. Use the AWS CLI to start a session."
-# session-manager-plugin
-function ssmto {
-  local sts_output=$(aws sts get-caller-identity | jq -r '.Arn')
-  echo "Using AWS Credentials: $sts_output"
-  echo " "
-  echo "Searching for instancewith '$1' in the name..."
-  # local target="$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$1*" --region "$AWS_REGION")"
-  local target="$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$1*")"
-  local target_name="$(echo $target| jq -r '.Reservations[0].Instances[]|.Tags[]|select(.Key=="Name")|.Value')"
-  target_id="$(echo $target| jq -r '.Reservations[0].Instances[]|.InstanceId')"
-  echo "Connection to instance via ssm: [$target_name] - [$target_id]"
-  # aws ssm start-session --target "$target_id" --region "$AWS_REGION"
-  aws ssm start-session --target "$target_id"
-}
-
-function ssminventory {
-  echo "============================================================"
-  local sts_output=$(aws sts get-caller-identity | jq -r '.Arn')
-  echo "Using AWS Credentials: $sts_output"
-  echo " "
-  echo "Show SSM Ec2 Instance Inventory:"
-  echo " "
-  local result_size="100"
-  # local instance_ids=($(aws ssm get-inventory --max-items "$result_size" --page-size" $result_size" | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
-  local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
-  # NOTE: Here we want to use the pagination api and build the full list before moving on to gettign the ec2 information
-
-  local instance_ids_spaced_list=''
-  for id in ${instance_ids[@]}
-  do
-    instance_ids_spaced_list="$instance_ids_spaced_list${id} "
-  done
-  local describe_output="$(aws ec2 describe-instances --instance-ids $instance_ids_spaced_list)"
-  echo "$describe_output" | jq -r '.Reservations[] | .Instances[] | .Tags[] | select(.Key=="Name") | .Value'
-  echo "============================================================"
-}
-
 
 #https://www.cyberciti.biz/tips/howto-linux-unix-bash-shell-setup-prompt.html
 PS1="\D{%Y.%m.%d-%H:%M:%S}|\w:"

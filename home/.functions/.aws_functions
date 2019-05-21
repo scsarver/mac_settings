@@ -1,0 +1,42 @@
+#Install SSM Manager plugin
+# Reference: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+# curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac/sessionmanager-bundle.zip" -o "sessionmanager-bundle.zip"
+# unzip sessionmanager-bundle.zip
+# sudo ./sessionmanager-bundle/install -i /usr/local/sessionmanagerplugin -b /usr/local/bin/session-manager-plugin
+# #Output should match: "The Session Manager plugin is installed successfully. Use the AWS CLI to start a session."
+# session-manager-plugin
+function ssmto {
+  local sts_output=$(aws sts get-caller-identity | jq -r '.Arn')
+  echo "Using AWS Credentials: $sts_output"
+  echo " "
+  echo "Searching for instancewith '$1' in the name..."
+  # local target="$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$1*" --region "$AWS_REGION")"
+  local target="$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$1*")"
+  local target_name="$(echo $target| jq -r '.Reservations[0].Instances[]|.Tags[]|select(.Key=="Name")|.Value')"
+  target_id="$(echo $target| jq -r '.Reservations[0].Instances[]|.InstanceId')"
+  echo "Connection to instance via ssm: [$target_name] - [$target_id]"
+  # aws ssm start-session --target "$target_id" --region "$AWS_REGION"
+  aws ssm start-session --target "$target_id"
+}
+
+function ssminventory {
+  echo "============================================================"
+  local sts_output=$(aws sts get-caller-identity | jq -r '.Arn')
+  echo "Using AWS Credentials: $sts_output"
+  echo " "
+  echo "Show SSM Ec2 Instance Inventory:"
+  echo " "
+  local result_size="100"
+  # local instance_ids=($(aws ssm get-inventory --max-items "$result_size" --page-size" $result_size" | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
+  local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
+  # NOTE: Here we want to use the pagination api and build the full list before moving on to gettign the ec2 information
+
+  local instance_ids_spaced_list=''
+  for id in ${instance_ids[@]}
+  do
+    instance_ids_spaced_list="$instance_ids_spaced_list${id} "
+  done
+  local describe_output="$(aws ec2 describe-instances --instance-ids $instance_ids_spaced_list)"
+  echo "$describe_output" | jq -r '.Reservations[] | .Instances[] | .Tags[] | select(.Key=="Name") | .Value'
+  echo "============================================================"
+}

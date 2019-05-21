@@ -33,3 +33,24 @@ function mknote {
   touch "$NOTE_FILE"
   open "$NOTE_FILE"
 }
+
+alias cdrepos="cd $REPOS_BASE_DIR"
+alias cdodin="cd $REPOS_BASE_DIR/opploans/opploans-odin"
+alias cdonelog="cd $ONELOGIN_CREDS_LOCATION"
+alias cdproto="cd $REPOS_BASE_DIR/prototype"
+alias cdop="cd $REPOS_BASE_DIR/opploans/opploans"
+
+function cdiac {
+    local CURRENT_START_PATH="$(pwd)"
+    local CURRENT_PATH="${CURRENT_START_PATH##*[/]}"
+    if [[ $CURRENT_START_PATH == *"iac"* ]]; then
+      while [ "iac" != "$CURRENT_PATH" ]
+      do
+        cd ..
+        CURRENT_PATH_TMP="$(pwd)"
+        CURRENT_PATH="${CURRENT_PATH_TMP##*[/]}"
+      done
+    else
+        echo "No iac directory in the current path: $CURRENT_START_PATH"
+    fi
+}

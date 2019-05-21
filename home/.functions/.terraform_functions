@@ -95,6 +95,8 @@ function tfunlock {
   aws dynamodb delete-item --table-name "$REMOTE_STATE_DYNAMODB_TABLE" --key "$DYNAMODB_DELETE_LOCK_PAYLOAD" --region "$REMOTE_STATE_REGION"
 }
 
+# This alias is used in conjunction with tfdo_old to clean up local terraform config and state files as well as local creds files.
+alias tfinitrm="rm -rf .terraform;unset AWS_SHARED_CREDENTIALS_FILE;rm awscreds*;rm *tfstate*"
 
 # This is the previous version of tfdo where we assume execution of terraform from within the tolder and varfiles are referenced from the tolder as a base.
 function tfdo_old {
@@ -134,6 +136,7 @@ function tfdo_old {
       base_var_file_cmd="$base_var_file_cmd $3 $4"
     fi
   fi
+
   echo "tfdo_old "$1" $base_var_file_cmd"
   terraform "$1" $base_var_file_cmd
 }
