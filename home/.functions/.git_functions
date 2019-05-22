@@ -3,9 +3,13 @@
 
 alias gs='git status'
 alias gb='git branch'
+alias gbr='git branch -r'
 alias glo='git log --oneline'
 alias gls='git log --stat'
 alias glp="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias gdo='git diff --name-status origin/master master'
+alias gdol='git diff master..origin/master'
+alias gdu='git fetch origin;git diff @{upstream}'
 
 function gd {
   local git_status_list_position_index="0"

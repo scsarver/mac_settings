@@ -54,3 +54,7 @@ function cdiac {
         echo "No iac directory in the current path: $CURRENT_START_PATH"
     fi
 }
+
+function comparethem {
+  /Applications/Xcode.app/Contents/Developer/usr/bin/opendiff $1 $2
+}

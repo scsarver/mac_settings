@@ -137,7 +137,10 @@ function cpgitdir {
 }
 
 #https://www.cyberciti.biz/tips/howto-linux-unix-bash-shell-setup-prompt.html
-PS1="\033[2m\D{%Y.%m.%d-%H:%M:%S}\033[0m\033[1m|\033[0m\w\033[1m:\033[0m"
+# PS1="\033[2m\D{%Y.%m.%d-%H:%M:%S}\033[0m\033[1m|\033[0m\w\033[1m:\033[0m"
+# https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux/20983251#20983251
+# Added exscaping for PS1 using ansi codes see above link.
+PS1="\[\033[2m\]\D{%Y.%m.%d-%H:%M:%S}\[\033[0m\]\[\033[1m\]|\[\033[0m\]\w\[\033[1m\]:\[\033[0m\]"
 export EDITOR=vim
 export PATH="/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:$PATH"
 
