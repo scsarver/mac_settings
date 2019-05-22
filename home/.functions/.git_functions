@@ -11,6 +11,12 @@ alias gdo='git diff --name-status origin/master master'
 alias gdol='git diff master..origin/master'
 alias gdu='git fetch origin;git diff @{upstream}'
 
+
+function show_parent_branch {
+  # https://stackoverflow.com/questions/3161204/find-the-parent-branch-of-a-git-branch
+  git show-branch | grep '*' | grep -v "$(git rev-parse --abbrev-ref HEAD)" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//'
+}
+
 function gd {
   local git_status_list_position_index="0"
   local count=0
