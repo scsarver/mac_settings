@@ -3,6 +3,7 @@
 
 alias gs='git status'
 alias gb='git branch'
+alias gp='git pull'
 alias gbr='git branch -r'
 alias glo='git log --oneline'
 alias gls='git log --stat'

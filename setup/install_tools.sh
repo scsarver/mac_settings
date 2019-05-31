@@ -50,6 +50,7 @@ homebrew_casks=(
   'dbeaver-community'
   'authy'
   'meld'
+  'sfdx'
 )
 
 homebrew_taps=(
@@ -93,6 +94,7 @@ python3_pips=(
   'yamllint'
   'ruamel.yaml'
   'pyhcl'
+  'BeautifulSoup'
 )
 
 set +e

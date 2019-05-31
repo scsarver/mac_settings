@@ -27,20 +27,35 @@ function ssminventory {
   echo "Show SSM Ec2 Instance Inventory:"
   echo " "
   local result_size="100"
-  # local instance_ids=($(aws ssm get-inventory --max-items "$result_size" --page-size" $result_size" | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
-  #local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
 
-
-  local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .'))
   # NOTE: Here we want to use the pagination api and build the full list before moving on to gettign the ec2 information
+
+  # local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
+  local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | "\(.InstanceId)|\(.IpAddress)"'))
+  # local instance_ids=($(aws ssm get-inventory --max-items "$result_size" --page-size" $result_size" | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
+
 
   local instance_ids_spaced_list=''
   for id in ${instance_ids[@]}
   do
-    echo "$id"
-    instance_ids_spaced_list="$instance_ids_spaced_list${id} "
+    echo "${id}"
+    instance_ids_spaced_list="$instance_ids_spaced_list${id%[|]*} "
   done
-  local describe_output="$(aws ec2 describe-instances --instance-ids $instance_ids_spaced_list)"
-  echo "$describe_output" | jq -r '.Reservations[] | .Instances[] | .Tags[] | select(.Key=="Name") | .Value'
+  # local describe_output="$(aws ec2 describe-instances --instance-ids $instance_ids_spaced_list)"
+  local describe_output="$(aws ec2 describe-instances  --instance-ids $instance_ids_spaced_list --query 'Reservations[*].Instances[*].[InstanceId,ImageId,PrivateIpAddress,Tags[?Key==`Name`].Value]')"
+  # echo "$describe_output" | jq -r '.Reservations[] | .Instances[] | .Tags[] | select(.Key=="Name") | .Value'
+  # echo "$describe_output" | jq -r '.Reservations[] | .Instances[] | select(.Tags[].Key=="Name") | "\( select(.Tags[] | .Key=="Name" ).Value)|\(.InstanceId)|\(.PrivateIpAddress)|\(.PrivateIpAddress)"'
+  # echo "$describe_output" | jq -r '.Reservations[] | .Instances[] | select(.Tags[].Key=="Name") | select(.Tags[].Key | contains("Name")) | .Value'
+  # echo "$describe_output" | jq -r '.Reservations[] | .Instances[] | select(.Tags[].Key=="Name") | select(.Tags[].Key | contains("Name"))'
+
+
+  # echo "$describe_output"
+  echo "$describe_output" |  jq -r '.[] | .[] | "\(.[0])|\(.[1])|\(.[2])|\(.[3]|.[0])"'
+
   echo "============================================================"
+}
+
+
+function get_instance_data {
+  aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,ImageId,Tags[?Key==`Name`].Value]' | jq -r '.[] | .[] | "\(.[0])|\(.[1])|\(.[2]|.[0])"' | grep $1
 }
