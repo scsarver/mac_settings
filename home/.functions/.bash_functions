@@ -1,5 +1,14 @@
 
 
+function showenvlike {
+  printenv | grep $1
+}
+
+# Take a string find all environment variables that match and unset them from the current shell context.
+function unsetenvlike {
+  while read var; do unset $var; done < <(env | grep -i $1 | awk -F'=' '{print$1}')
+}
+
 # Investigate xcol : https://ownyourbits.com/2017/01/23/colorize-your-stdout-with-xcol/
 
 function setstyle {

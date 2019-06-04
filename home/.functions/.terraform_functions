@@ -140,3 +140,14 @@ function tfdo_old {
   echo "tfdo_old "$1" $base_var_file_cmd"
   terraform "$1" $base_var_file_cmd
 }
+
+
+function settflog {
+  export TF_LOG=TRACE
+  export TF_LOG_PATH=terraform.log
+}
+
+function unsettflog {
+  unset TF_LOG
+  unset TF_LOG_PATH
+}
