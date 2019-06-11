@@ -58,3 +58,18 @@ function cdiac {
 function comparethem {
   /Applications/Xcode.app/Contents/Developer/usr/bin/opendiff $1 $2
 }
+
+
+
+#https://stackoverflow.com/questions/352098/how-can-i-pretty-print-json-in-a-shell-script
+prettyjson_s() {
+    echo "$1" | python -m json.tool
+}
+
+prettyjson_f() {
+    python -m json.tool "$1"
+}
+
+prettyjson_w() {
+    curl "$1" | python -m json.tool
+}
