@@ -149,51 +149,52 @@ installed_homebrew="$(brew 2>&1 | tr -d '\r' | awk -F':' '{print $4}')"
 if [[ "${installed_homebrew## }" == "command not found" ]]; then
   echo "Homebrew is not installed..."
 
-	homebrew_directory=Homebrew
+  homebrew_directory=Homebrew
 
-	sudo chown $(whoami):admin /usr/local/bin
+  sudo chown $(whoami):admin /usr/local/bin
 
   sudo mkdir /usr/local/$homebrew_directory
-	sudo chown $(whoami):admin /usr/local/$homebrew_directory
-	curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C /usr/local/$homebrew_directory
+  sudo chown $(whoami):admin /usr/local/$homebrew_directory
+  curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C /usr/local/$homebrew_directory
 
   sudo mkdir /usr/local/$homebrew_directory/locks
-	sudo chown $(whoami):admin /usr/local/$homebrew_directory/locks
+  sudo chown $(whoami):admin /usr/local/$homebrew_directory/locks
 
+  #TODO: Iterate over a list
   sudo mkdir /usr/local/Frameworks
-	sudo chown $(whoami):admin /usr/local/Frameworks
+  sudo chown $(whoami):admin /usr/local/Frameworks
 
   sudo mkdir /usr/local/etc
-	sudo chown $(whoami):admin /usr/local/etc
+  sudo chown $(whoami):admin /usr/local/etc
 
   sudo mkdir /usr/local/include
-	sudo chown $(whoami):admin /usr/local/include
+  sudo chown $(whoami):admin /usr/local/include
 
   sudo mkdir /usr/local/lib
-	sudo chown $(whoami):admin /usr/local/lib
+  sudo chown $(whoami):admin /usr/local/lib
 
   sudo mkdir /usr/local/opt
-	sudo chown $(whoami):admin /usr/local/opt
+  sudo chown $(whoami):admin /usr/local/opt
 
   sudo mkdir /usr/local/sbin
-	sudo chown $(whoami):admin /usr/local/sbin
+  sudo chown $(whoami):admin /usr/local/sbin
 
   sudo mkdir /usr/local/share
-	sudo chown $(whoami):admin /usr/local/share
+  sudo chown $(whoami):admin /usr/local/share
 
   sudo mkdir /usr/local/Cellar
-	sudo chown $(whoami):admin /usr/local/Cellar
+  sudo chown $(whoami):admin /usr/local/Cellar
 
   sudo mkdir -p /usr/local/var/homebrew/linked
-	sudo chown $(whoami):admin /usr/local/var
-	sudo chown $(whoami):admin /usr/local/var/homebrew
-	sudo chown $(whoami):admin /usr/local/var/homebrew/linked
+  sudo chown $(whoami):admin /usr/local/var
+  sudo chown $(whoami):admin /usr/local/var/homebrew
+  sudo chown $(whoami):admin /usr/local/var/homebrew/linked
 
-	sudo ln -s /usr/local/$homebrew_directory/bin/brew /usr/local/bin/brew
-	brew doctor
+  sudo ln -s /usr/local/$homebrew_directory/bin/brew /usr/local/bin/brew
+  brew doctor
 
-	echo " "
-	echo " "
+  echo " "
+  echo " "
 else
   echo "Homebrew is installed!"
 fi
