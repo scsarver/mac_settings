@@ -35,10 +35,8 @@ function mknote {
 }
 
 alias cdrepos="cd $REPOS_BASE_DIR"
-alias cdodin="cd $REPOS_BASE_DIR/opploans/opploans-odin"
-alias cdonelog="cd $ONELOGIN_CREDS_LOCATION"
+alias cdsc="cd $REPOS_BASE_DIR/scsarver"
 alias cdproto="cd $REPOS_BASE_DIR/prototype"
-alias cdop="cd $REPOS_BASE_DIR/opploans/opploans"
 
 function cdiac {
     local CURRENT_START_PATH="$(pwd)"
