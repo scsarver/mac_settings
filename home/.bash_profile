@@ -1,13 +1,13 @@
 #Note this file needs to be set based on the cloned location of the repo.
 REPOS_BASE_DIR="/Users/$(whoami)/Documents/repos"
 
-MAC_SETTINGS_HOME="$REPOS_BASE_DIR/mac_settings/home"
-MAC_SETTINGS_SETUP="$REPOS_BASE_DIR/mac_settings/setup"
+MAC_SETTINGS_HOME="$REPOS_BASE_DIR/scsarver/mac_settings/home"
+MAC_SETTINGS_SETUP="$REPOS_BASE_DIR/scsarver/mac_settings/setup"
 
-UTILITY_SCRIPTS_GITDIR_FILE="$REPOS_BASE_DIR/utility_scripts/gitdir"
+UTILITY_SCRIPTS_GITDIR_FILE="$REPOS_BASE_DIR/scsarver/utility_scripts/gitdir"
 ONELOGIN_CREDS_LOCATION="$REPOS_BASE_DIR/onelogin-python-aws-assume-role/src/onelogin/aws-assume-role"
 
-ONELOGIN_ODIN_CREDS_LOCATION="$REPOS_BASE_DIR/opploans/opploans-odin/odin-tools/onelogin"
+ONELOGIN_ODIN_CREDS_LOCATION="$REPOS_BASE_DIR/xxxx/xxxx-odin/odin-tools/onelogin"
 ONELOGIN_ODIN_ASSUME_SCRIPT_NAME="onelogin-aws-assume-role.py"
 
 OPENDNS_1="208.67.222.222"
