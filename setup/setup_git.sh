@@ -12,6 +12,7 @@ home_dir="/Users/$user_name"
 git config --global user.name "$user_name"
 git config --global user.email "$user_email"
 git config --global core.editor vim
+git config --global credential.helper store
 
 git config --list
 

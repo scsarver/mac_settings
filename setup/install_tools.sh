@@ -51,6 +51,7 @@ homebrew_casks=(
   'authy'
   #'sfdx' # Salesforce DX cli
 	'bitwarden'
+  'powershell'
 )
 
 homebrew_taps=(
@@ -135,6 +136,9 @@ if [ "YES" != "$(defaults read com.apple.finder _FXShowPosixPathInTitle)" ]; the
 fi
 echo " "
 echo " "
+
+defaults write com.apple.finder ShowPathbar -bool true
+defaults write com.apple.finder ShowStatusBar -bool true
 
 
 echo "Set the TextEdit apps tab preferences to 2 spaces"
