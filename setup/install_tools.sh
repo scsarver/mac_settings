@@ -32,7 +32,8 @@ homebrew_packages=(
   'speedtest-cli'
   'googler'
   'oath-toolkit'
-)
+  'rukenshia/repo/saml2aws-auto' # From tap rukenshia/repo
+  )
 
 homebrew_casks=(
   'google-chrome'
@@ -56,7 +57,10 @@ homebrew_casks=(
 
 homebrew_taps=(
  # 'homebrew/boneyard' # Deprecated tap:  https://discourse.brew.sh/t/whats-the-deal-with-the-boneyard/849
+ 'rukenshia/repo' # Holds the saml2aws-auto code
 )
+
+
 
 python2_pips=(
   'boto'
@@ -146,7 +150,7 @@ defaults write com.apple.TextEdit "TabWidth" '2'
 echo " "
 echo " "
 
-
+echo "================================================================================"
 echo "Check if Homebrew is installed!"
 installed_homebrew="$(brew 2>&1 | tr -d '\r' | awk -F':' '{print $4}')"
 #echo "output: X${installed_homebrew## }"
@@ -202,6 +206,19 @@ if [[ "${installed_homebrew## }" == "command not found" ]]; then
 else
   echo "Homebrew is installed!"
 fi
+
+echo "Always run the brew update:"
+brew update
+echo "Always run the brew doctor:"
+brew doctor
+echo " "
+echo "Showing brew config:"
+brew config
+echo " "
+echo " NOTE: if you are scrolling back because of an error you can run 'brew gist-logs package-name' to get package specific errors!"
+echo " "
+echo "================================================================================"
+
 
 #echo "Need to set the PATH!!!!"
 #Warning: Homebrew's sbin was not found in your PATH but you have installed
