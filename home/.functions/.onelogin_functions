@@ -1,0 +1,14 @@
+# ONELOGIN_CREDS_LOCATION="$REPOS_BASE_DIR/onelogin-python-aws-assume-role/src/onelogin/aws-assume-role"
+# ONELOGIN_ODIN_CREDS_LOCATION="$REPOS_BASE_DIR/xxxx/xxxx-odin/odin-tools/onelogin"
+# ONELOGIN_ODIN_ASSUME_SCRIPT_NAME="onelogin-aws-assume-role.py"
+# function awsonelogin {
+#     python "$ONELOGIN_ODIN_CREDS_LOCATION/$ONELOGIN_ODIN_ASSUME_SCRIPT_NAME"
+# }
+#
+# function awsoneloginset {
+#     export AWS_SHARED_CREDENTIALS_FILE="$(cat $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json | jq -r '.aws_shared_credentials_file')"
+#     export AWS_PROFILE="$(cat $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json | jq -r '.aws_profile')"
+#     export AWS_REGION="$(cat $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json | jq -r '.aws_region')"
+#     export AWS_DEFAULT_REGION="$AWS_REGION"
+# }
+# alias awsoneloginconfig="vim $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json"

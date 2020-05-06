@@ -1,3 +1,44 @@
+alias awsacctalias="aws iam list-account-aliases | jq -r \".AccountAliases[0]\""
+alias awsgetcaller="aws sts get-caller-identity"
+alias awsunsetcreds="unset AWS_SHARED_CREDENTIALS_FILE"
+alias awscheckcreds="printenv | grep AWS_SHARED_CREDENTIALS_FILE"
+alias awsunsetprofile="unset AWS_PROFILE"
+alias awscheckprofile="printenv | grep AWS_PROFILE"
+alias awscheck="printenv | grep AWS_"
+alias awswhoami="aws iam list-account-aliases | jq -r \".AccountAliases[0]\";aws sts get-caller-identity"
+
+
+function awssetcreds {
+    export AWS_SHARED_CREDENTIALS_FILE="$1"
+}
+
+function awssetprofile {
+    export AWS_PROFILE="$1"
+}
+
+# function setcreds {
+#     export AWS_SHARED_CREDENTIALS_FILE="$(ls | grep awscreds)"
+# }
+
+function unsetaws {
+  #https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
+  unset AWS_ACCESS_KEY_ID
+  unset AWS_SECRET_ACCESS_KEY
+  unset AWS_SESSION_TOKEN
+  unset AWS_DEFAULT_REGION
+  unset AWS_DEFAULT_OUTPUT
+  unset AWS_DEFAULT_PROFILE
+  unset AWS_CA_BUNDLE
+  unset AWS_SHARED_CREDENTIALS_FILE
+  unset AWS_CONFIG_FILE
+  #https://docs.aws.amazon.com/cli/latest/topic/config-vars.html
+  unset AWS_PROFILE
+  unset AWS_METADATA_SERVICE_TIMEOUT
+  unset AWS_METADATA_SERVICE_NUM_ATTEMPTS
+  #I think this is remanant of usage thart was supposed to be looking at AWS_DEFAULT_REGION yet here it lives on :(
+  unset AWS_REGION
+}
+
 #Install SSM Manager plugin
 # Reference: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
 # curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac/sessionmanager-bundle.zip" -o "sessionmanager-bundle.zip"

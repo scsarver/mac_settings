@@ -1,0 +1,2 @@
+alias atomhelp="echo 'cmd + shift + l' to set the individual custom file type, Note using config.cson has issues with .sometype file patterns."
+alias atomconfig="vi ~/.atom/config.cson"

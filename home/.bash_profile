@@ -5,10 +5,6 @@ MAC_SETTINGS_HOME="$REPOS_BASE_DIR/scsarver/mac_settings/home"
 MAC_SETTINGS_SETUP="$REPOS_BASE_DIR/scsarver/mac_settings/setup"
 
 UTILITY_SCRIPTS_GITDIR_FILE="$REPOS_BASE_DIR/scsarver/utility_scripts/gitdir"
-ONELOGIN_CREDS_LOCATION="$REPOS_BASE_DIR/onelogin-python-aws-assume-role/src/onelogin/aws-assume-role"
-
-ONELOGIN_ODIN_CREDS_LOCATION="$REPOS_BASE_DIR/xxxx/xxxx-odin/odin-tools/onelogin"
-ONELOGIN_ODIN_ASSUME_SCRIPT_NAME="onelogin-aws-assume-role.py"
 
 OPENDNS_1="208.67.222.222"
 OPENDNS_2="208.67.220.220"
@@ -31,8 +27,10 @@ for file in $(find $MAC_SETTINGS_HOME/.functions -type f -name '*.*_functions');
   source "$file";
 done
 
-alias atomcfg="vim /Users/$(whoami)/.atom/config.cson"
+# NOTE: To see the declared functions from the terminal run the command: declare -F
+# NOTE: To see the declared aliases from the terminal run the command: alias
 
+alias atomcfg="vim /Users/$(whoami)/.atom/config.cson"
 
 alias grepc="grep --color=auto"
 alias ll="ls -la"
@@ -43,59 +41,6 @@ alias ipe='curl ipinfo.io/ip'
 alias ipi='ipconfig getifaddr en0'
 alias getweather="curl -4 http://wttr.in/chicago"
 
-alias awsacctalias="aws iam list-account-aliases | jq -r \".AccountAliases[0]\""
-alias awsgetcaller="aws sts get-caller-identity"
-alias awsoneloginconfig="vim $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json"
-
-function awsonelogin {
-    python "$ONELOGIN_ODIN_CREDS_LOCATION/$ONELOGIN_ODIN_ASSUME_SCRIPT_NAME"
-}
-
-function awsoneloginset {
-    export AWS_SHARED_CREDENTIALS_FILE="$(cat $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json | jq -r '.aws_shared_credentials_file')"
-    export AWS_PROFILE="$(cat $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json | jq -r '.aws_profile')"
-    export AWS_REGION="$(cat $ONELOGIN_ODIN_CREDS_LOCATION/onelogin.sdk.json | jq -r '.aws_region')"
-    export AWS_DEFAULT_REGION="$AWS_REGION"
-}
-
-function awssetcreds {
-    export AWS_SHARED_CREDENTIALS_FILE="$1"
-}
-
-function awssetprofile {
-    export AWS_PROFILE="$1"
-}
-
-function setcreds {
-    export AWS_SHARED_CREDENTIALS_FILE="$(ls | grep awscreds)"
-}
-
-function unsetaws {
-  #https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
-  unset AWS_ACCESS_KEY_ID
-  unset AWS_SECRET_ACCESS_KEY
-  unset AWS_SESSION_TOKEN
-  unset AWS_DEFAULT_REGION
-  unset AWS_DEFAULT_OUTPUT
-  unset AWS_DEFAULT_PROFILE
-  unset AWS_CA_BUNDLE
-  unset AWS_SHARED_CREDENTIALS_FILE
-  unset AWS_CONFIG_FILE
-  #https://docs.aws.amazon.com/cli/latest/topic/config-vars.html
-  unset AWS_PROFILE
-  unset AWS_METADATA_SERVICE_TIMEOUT
-  unset AWS_METADATA_SERVICE_NUM_ATTEMPTS
-  #I think this is remanant of usage thart was supposed to be looking at AWS_DEFAULT_REGION yet here it lives on :(
-  unset AWS_REGION
-}
-
-
-alias unsetcreds="unset AWS_SHARED_CREDENTIALS_FILE"
-alias checkcreds="printenv | grep AWS_SHARED_CREDENTIALS_FILE"
-alias unsetprofile="unset AWS_PROFILE"
-alias checkprofile="printenv | grep AWS_PROFILE"
-alias checkaws="printenv | grep AWS_"
-alias awswhoami="aws iam list-account-aliases | jq -r \".AccountAliases[0]\";aws sts get-caller-identity"
 
 alias sshbastion="ssh -i ~/.ssh/id_rsa ubuntu@SOMEIPADDRESSS"
 
@@ -142,7 +87,8 @@ function cpgitdir {
 # Added exscaping for PS1 using ansi codes see above link.
 PS1="\[\033[2m\]\D{%Y.%m.%d-%H:%M:%S}\[\033[0m\]\[\033[1m\]|\[\033[0m\]\w\[\033[1m\]:\[\033[0m\]"
 export EDITOR=vim
-export PATH="/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:$PATH"
+# NOTE: Added /usr/local/sbin as suggetsed by brew doctor
+export PATH="/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:/usr/local/sbin:$PATH"
 
 # this alias is for self-generated ssh keys that have been imported into AWS.
 # alias awsimportedkeyfp='for file in `ls ~/.ssh/*id_rsa$*`; do echo -n $file " - " ; openssl pkey -in $file -pubout -outform DER | openssl md5 -c; done'
