@@ -15,6 +15,7 @@ homebrew_packages=(
   'tree'
   'python3'
   'jq'
+  'yq'
   'wireshark'
   'golang'
   'glide'
