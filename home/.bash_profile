@@ -81,6 +81,14 @@ function cpgitdir {
   chmod +x gitdir
 }
 
+function getoathtkn {
+  if [ -f "$1" ]; then
+    oathtool --base32 --totp "$(zbarimg -q $1 | sed 's/.*secret=//' | sed 's/&.*//')"
+  else
+    echo "Expected file input was not found: $1"
+  fi
+}
+
 #https://www.cyberciti.biz/tips/howto-linux-unix-bash-shell-setup-prompt.html
 # PS1="\033[2m\D{%Y.%m.%d-%H:%M:%S}\033[0m\033[1m|\033[0m\w\033[1m:\033[0m"
 # https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux/20983251#20983251
@@ -88,7 +96,10 @@ function cpgitdir {
 PS1="\[\033[2m\]\D{%Y.%m.%d-%H:%M:%S}\[\033[0m\]\[\033[1m\]|\[\033[0m\]\w\[\033[1m\]:\[\033[0m\]"
 export EDITOR=vim
 # NOTE: Added /usr/local/sbin as suggetsed by brew doctor
-export PATH="/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:/usr/local/sbin:$PATH"
+# export PATH="/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:/usr/local/sbin:$PATH"
+
+# NOTE: Added this oddball location for fly/concourse: /Users/sarvers/Documents/repos/scsarver/utility_scripts/concourse/fly
+export PATH="/Users/sarvers/Documents/repos/scsarver/utility_scripts/concourse:/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:/usr/local/sbin:$PATH"
 
 # this alias is for self-generated ssh keys that have been imported into AWS.
 # alias awsimportedkeyfp='for file in `ls ~/.ssh/*id_rsa$*`; do echo -n $file " - " ; openssl pkey -in $file -pubout -outform DER | openssl md5 -c; done'

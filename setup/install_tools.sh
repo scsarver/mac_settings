@@ -8,32 +8,35 @@
 #
 
 homebrew_packages=(
-  'packer'
-  'terraform'
-  'awscli'
-  'git'
-  'tree'
-  'python3'
-  'jq'
-  'yq'
-  'wireshark'
-  'golang'
-  'glide'
-  'groovy'
-  'python'
-  'bash-completion'
   'curl'
   'libressl'
-  #'terraforming'
   'gpg'
+  'tree'
+  'telnet'
+  'glide'
+  'oath-toolkit'
+  'zbar'
+  'qrencode'
+  'bash-completion'
+  'git'
+  'python'
+  'python3'
   'pipenv'
+  'jq'
+  'yq'
+  'awscli'
+  'golang'
+  'groovy'
+  'packer'
+  'terraform'
+  'vault'
+  'wireshark'
   'certbot'
   'postgres'
-  'telnet'
   'speedtest-cli'
   'googler'
-  'oath-toolkit'
   'rukenshia/repo/saml2aws-auto' # From tap rukenshia/repo
+  #'terraforming'
   )
 
 homebrew_casks=(
@@ -54,6 +57,7 @@ homebrew_casks=(
   #'sfdx' # Salesforce DX cli
 	'bitwarden'
   'powershell'
+  'rocket-chat'
 )
 
 homebrew_taps=(
