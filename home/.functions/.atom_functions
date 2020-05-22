@@ -1,2 +1,2 @@
-alias atomhelp="echo 'cmd + shift + l' to set the individual custom file type, Note using config.cson has issues with .sometype file patterns.; echo The following path to this projects atom config: scsarver/mac_settings/home/.atom/config.cson"
+alias atomhelp="echo 'ctrl + shift + l' to set the individual custom file type, Note using config.cson has issues with .sometype file patterns.; echo The following path to this projects atom config: scsarver/mac_settings/home/.atom/config.cson"
 alias atomconfig="vi ~/.atom/config.cson"

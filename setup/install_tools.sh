@@ -58,6 +58,7 @@ homebrew_casks=(
 	'bitwarden'
   'powershell'
   'rocket-chat'
+  'postman'
 )
 
 homebrew_taps=(
