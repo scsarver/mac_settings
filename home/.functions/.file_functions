@@ -18,6 +18,8 @@ function newsh {
   echo "set +v #verbose" >> "$SH_FILE"
   echo "set -e #errexit" >> "$SH_FILE"
   echo "set -u #nounset" >> "$SH_FILE"
+  echo 'SCRIPTDIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)' >> "$SH_FILE"
+  echo 'SCRIPTNAME=$(basename $0)' >> "$SH_FILE"
   echo " " >> "$SH_FILE"
   chmod 740 "$SH_FILE"
 }

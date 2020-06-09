@@ -47,3 +47,26 @@ function gd {
   echo " "
   echo "============================================================"
 }
+
+
+function githelp {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+Is there a git-merge --dry-run option?
+  [https://stackoverflow.com/questions/501407/is-there-a-git-merge-dry-run-option]
+
+  -  Sort of: to avoid a fast-forward commit, but this will still modify your working copy
+
+     git merge --no-commit --no-ff [your_branch_name]
+
+     To undo the merge, even if it is a fast-forward merge
+     git merge --abort
+
+     You can also use git diff to compare between local and remote branches
+     git diff master origin/master
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+
+}

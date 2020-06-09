@@ -64,6 +64,16 @@ function cpsbp {
   source ~/.bash_profile
 }
 
+function vifunction {
+  if [ "" == "$1" ]; then
+    echo "functions file type required!"
+  fi
+  if [ -f "$MAC_SETTINGS_HOME/.functions/$(ls -a $MAC_SETTINGS_HOME/.functions | grep $1_functions)" ]; then
+    vim "$MAC_SETTINGS_HOME/.functions/$(ls -a $MAC_SETTINGS_HOME/.functions | grep $1_functions)"
+  else
+    echo "Function file not found: $MAC_SETTINGS_HOME/.functions/$(ls -a $MAC_SETTINGS_HOME/.functions | grep $1_functions)"
+  fi
+}
 
 # Open mac_settings project install_tools.sh script for editing
 function viit {

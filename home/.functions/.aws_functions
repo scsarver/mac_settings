@@ -7,7 +7,6 @@ alias awscheckprofile="printenv | grep AWS_PROFILE"
 alias awscheck="printenv | grep AWS_"
 alias awswhoami="aws iam list-account-aliases | jq -r \".AccountAliases[0]\";aws sts get-caller-identity"
 
-
 function awssetcreds {
     export AWS_SHARED_CREDENTIALS_FILE="$1"
 }
@@ -16,11 +15,11 @@ function awssetprofile {
     export AWS_PROFILE="$1"
 }
 
-# function setcreds {
-#     export AWS_SHARED_CREDENTIALS_FILE="$(ls | grep awscreds)"
-# }
+function awssetregion {
+    export AWS_REGION="$1"
+}
 
-function unsetaws {
+function awsunset {
   #https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
   unset AWS_ACCESS_KEY_ID
   unset AWS_SECRET_ACCESS_KEY
@@ -46,7 +45,7 @@ function unsetaws {
 # sudo ./sessionmanager-bundle/install -i /usr/local/sessionmanagerplugin -b /usr/local/bin/session-manager-plugin
 # #Output should match: "The Session Manager plugin is installed successfully. Use the AWS CLI to start a session."
 # session-manager-plugin
-function ssmto {
+function awsssmto {
   local sts_output=$(aws sts get-caller-identity | jq -r '.Arn')
   echo "Using AWS Credentials: $sts_output"
   echo " "
@@ -60,7 +59,7 @@ function ssmto {
   aws ssm start-session --target "$target_id"
 }
 
-function ssminventory {
+function awsssminventory {
   echo "============================================================"
   local sts_output=$(aws sts get-caller-identity | jq -r '.Arn')
   echo "Using AWS Credentials: $sts_output"
@@ -75,7 +74,6 @@ function ssminventory {
   local instance_ids=($(aws ssm get-inventory | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | "\(.InstanceId)|\(.IpAddress)"'))
   # local instance_ids=($(aws ssm get-inventory --max-items "$result_size" --page-size" $result_size" | jq -r '.Entities[] | .Data | ."AWS:InstanceInformation" | .Content[] | select(.InstanceStatus!="Terminated") | .InstanceId'))
 
-
   local instance_ids_spaced_list=''
   for id in ${instance_ids[@]}
   do
@@ -89,14 +87,39 @@ function ssminventory {
   # echo "$describe_output" | jq -r '.Reservations[] | .Instances[] | select(.Tags[].Key=="Name") | select(.Tags[].Key | contains("Name")) | .Value'
   # echo "$describe_output" | jq -r '.Reservations[] | .Instances[] | select(.Tags[].Key=="Name") | select(.Tags[].Key | contains("Name"))'
 
-
   # echo "$describe_output"
   echo "$describe_output" |  jq -r '.[] | .[] | "\(.[0])|\(.[1])|\(.[2])|\(.[3]|.[0])"'
 
   echo "============================================================"
 }
 
-
-function get_instance_data {
+function awsgetinstancedata {
   aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,ImageId,Tags[?Key==`Name`].Value]' | jq -r '.[] | .[] | "\(.[0])|\(.[1])|\(.[2]|.[0])"' | grep $1
+}
+
+function awshelp {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+Aliases:
+  awsacctalias
+  awsgetcaller
+  awsunsetcreds
+  awscheckcreds
+  awsunsetprofile
+  awscheckprofile
+  awscheck
+  awswhoami
+
+Functions:
+  awssetcreds
+  awssetprofile
+  awssetregion
+  awsunset
+  awsssmto
+  awsssminventory
+  awsgetinstancedata
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
 }
