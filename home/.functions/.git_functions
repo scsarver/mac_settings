@@ -65,6 +65,22 @@ Is there a git-merge --dry-run option?
      You can also use git diff to compare between local and remote branches
      git diff master origin/master
 
+ Aliases:
+   alias gs='git status'
+   alias gb='git branch'
+   alias gp='git pull'
+   alias gbr='git branch -r'
+   alias glo='git log --oneline'
+   alias gls='git log --stat'
+   alias glp="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+   alias gdo='git diff --name-status origin/master master'
+   alias gdol='git diff master..origin/master'
+   alias gdu='git fetch origin;git diff @{upstream}'
+
+ Functions:
+   function show_parent_branch -
+   function gd - git diff helper
+
 HEREDOC_MESSAGE
 `
 echo "$MESSAGE"

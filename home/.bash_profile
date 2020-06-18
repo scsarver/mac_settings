@@ -111,6 +111,7 @@ export EDITOR=vim
 # NOTE: Added this oddball location for fly/concourse: /Users/sarvers/Documents/repos/scsarver/utility_scripts/concourse/fly
 export PATH="/Users/sarvers/Documents/repos/scsarver/utility_scripts/concourse:/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:/usr/local/sbin:$PATH"
 
+
 # this alias is for self-generated ssh keys that have been imported into AWS.
 # alias awsimportedkeyfp='for file in `ls ~/.ssh/*id_rsa$*`; do echo -n $file " - " ; openssl pkey -in $file -pubout -outform DER | openssl md5 -c; done'
 # this alias is for AWS-generated ssh keys.
@@ -121,6 +122,13 @@ if [ ! "" == "$(which go)" ]; then
   export PATH=$PATH:$(go env GOPATH)/bin
   export GOPATH=$(go env GOPATH)
 fi
+
+
+# NOTE: Added rbenv shims to the path to be caught before any other ruby install on the system.
+export PATH="~/.rbenv/shims:$PATH"
+# Load rbenv automatically by appending
+# the following to ~/.bash_profile:
+eval "$(rbenv init -)"
 
 #For bash-completion
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion

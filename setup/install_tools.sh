@@ -18,6 +18,7 @@ homebrew_packages=(
   'zbar'
   'qrencode'
   'bash-completion'
+  'shellcheck'
   'git'
   'python'
   'python3'
@@ -37,6 +38,7 @@ homebrew_packages=(
   'googler'
   'rukenshia/repo/saml2aws-auto' # From tap rukenshia/repo
   #'terraforming'
+  'rbenv'
   )
 
 homebrew_casks=(

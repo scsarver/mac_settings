@@ -1,0 +1,24 @@
+
+function rbenvhelp {
+
+# Note turned off variable expansion so the code will show and not be executed!
+MESSAGE=`cat <<"HEREDOC_MESSAGE"
+
+See documentation:
+  https://github.com/rbenv/rbenv
+  https://github.com/rbenv/rbenv#how-rbenv-hooks-into-your-shell
+
+
+Changes to ~/.bash_profile
+
+  # NOTE: Added rbenv shims to the path to be caught before any other ruby install on the system.
+  export PATH="~/.rbenv/shims:$PATH"
+  # Load rbenv automatically by appending
+  # the following to ~/.bash_profile:
+  eval "$(rbenv init -)"
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+
+}

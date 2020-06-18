@@ -4,24 +4,58 @@ function newsh {
   echo "file: $1"
   if [ "" != "$1" ]; then
     SH_FILE="$1"
+    #Consider checking for the file name!
+    # which -a $SH_FILE
+    # whereis $SH_FILE
+    # locate $SH_FILE
   fi
-  echo "#!/usr/bin/env bash" > "$SH_FILE"
-  echo "#" >> "$SH_FILE"
-  echo "# Created By: $(whoami)" >> "$SH_FILE"
-  echo "# Created Date: $(date +%Y%m%d-%H%M%S)" >> "$SH_FILE"
-  echo "#" >> "$SH_FILE"
-  echo "# Purpose and References:" >> "$SH_FILE"
-  echo "#" >> "$SH_FILE"
-  echo "#" >> "$SH_FILE"
-  echo "# Where you want the options to take effect, use set -o option-name or, in short form, set -option-abbrev, To disable an option within a script, use set +o option-name or set +option-abbrev: https://www.tldp.org/LDP/abs/html/options.html" >> "$SH_FILE"
-  echo "set +x #xtrace" >> "$SH_FILE"
-  echo "set +v #verbose" >> "$SH_FILE"
-  echo "set -e #errexit" >> "$SH_FILE"
-  echo "set -u #nounset" >> "$SH_FILE"
-  echo 'SCRIPTDIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)' >> "$SH_FILE"
-  echo 'SCRIPTNAME=$(basename $0)' >> "$SH_FILE"
-  echo " " >> "$SH_FILE"
+
+  NEWSH=$(cat <<"HEREDOCNEWSH"
+#!/usr/bin/env bash
+#
+# Created By: $(whoami)
+# Created Date: $(date +%Y%m%d-%H%M%S)
+#
+# Purpose and References: See usage function defined below - ref: https://en.wikipedia.org/wiki/Usage_message
+#
+# Where you want the options to take effect, use set -o option-name or, in short form, set -option-abbrev, To disable an option within a script, use set +o option-name or set +option-abbrev: https://www.tldp.org/LDP/abs/html/options.html
+set +x #xtrace
+set +v #verbose
+set -e #errexit
+set -u #nounset
+SCRIPTDIR="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+SCRIPTNAME="$(basename "$0")"
+LOG_TO_FILE="false"
+LOGFILE="$SCRIPTNAME-$(date +%Y%m%d-%H%M%S).log"
+function log {
+  if [ "true" == "$LOG_TO_FILE" ]; then
+    if [ "" == "$(which tee)" ]; then
+      echo "$1" && echo "$1">>"$LOGFILE"
+    else
+      echo "$1" | tee -a "$LOGFILE"
+    fi
+  else
+    echo "$1"
+  fi
+}
+if [ "true" == "$LOG_TO_FILE" ]; then
+  touch "$LOGFILE"
+fi
+function usage {
+USAGE=$(cat <<HEREDOCUSAGE
+  Usage: $SCRIPTNAME Path:$SCRIPTDIR
+HEREDOCUSAGE
+  )
+echo "$USAGE"
+}
+
+usage
+
+HEREDOCNEWSH
+)
+  echo "$NEWSH">"$SH_FILE"
   chmod 740 "$SH_FILE"
+  shellcheck "$SH_FILE"
 }
 
 # Used to pipe the man commands text into a pdf for easier viewing.
@@ -72,4 +106,29 @@ prettyjson_f() {
 
 prettyjson_w() {
     curl "$1" | python -m json.tool
+}
+
+function filehelp {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+aliases:
+  alias cdrepos="cd $REPOS_BASE_DIR"
+  alias cdsc="cd $REPOS_BASE_DIR/scsarver"
+  alias cdproto="cd $REPOS_BASE_DIR/prototype"
+
+functions:
+  newsh - Creates a template for a new shell script if passed a name the script will get the passed in name.
+  manpdf
+  mknote -
+  cdiac -
+  comparethem - Invokes opendiff to compare files
+  prettyjson_s
+  prettyjson_f
+  prettyjson_w
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+
 }
