@@ -97,6 +97,12 @@ function awsgetinstancedata {
   aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,ImageId,Tags[?Key==`Name`].Value]' | jq -r '.[] | .[] | "\(.[0])|\(.[1])|\(.[2]|.[0])"' | grep $1
 }
 
+function awsacctnumberfromarn {
+  if [ "" != "$1" ]; then
+    echo "$1" | awk -F':' '{print $5}'
+  fi
+}
+
 function awshelp {
 
 MESSAGE=`cat <<HEREDOC_MESSAGE
@@ -118,6 +124,7 @@ Functions:
   awsssmto
   awsssminventory
   awsgetinstancedata
+  awsacctnumberfromarn
 
 HEREDOC_MESSAGE
 `

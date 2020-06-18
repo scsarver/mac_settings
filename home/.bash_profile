@@ -45,21 +45,21 @@ alias getweather="curl -4 http://wttr.in/chicago"
 alias sshbastion="ssh -i ~/.ssh/id_rsa ubuntu@SOMEIPADDRESSS"
 
 # Open mac_settings project bash profile file
-function vibp {
+function bpvi {
   vim "$MAC_SETTINGS_HOME/.bash_profile"
 }
 
 # Copy mac settings project bash profile file into the users home directory
-function cpbp {
+function bpcp {
   cp "$MAC_SETTINGS_HOME/.bash_profile" ~/.bash_profile
 }
 
 # Source the users bash profile file
-function sourcebp {
+function bpsrc {
   source ~/.bash_profile
 }
 
-function cpsbp {
+function bpcps {
   cp "$MAC_SETTINGS_HOME/.bash_profile" ~/.bash_profile
   source ~/.bash_profile
 }
@@ -76,12 +76,12 @@ function vifunction {
 }
 
 # Open mac_settings project install_tools.sh script for editing
-function viit {
+function itvi {
   vi "$MAC_SETTINGS_SETUP/install_tools.sh"
 }
 
 # Run the install_tools.sh script in the mac_settings project
-function doit {
+function itdo {
   bash -c "$MAC_SETTINGS_SETUP/install_tools.sh"
 }
 
@@ -105,6 +105,64 @@ function getoathtkn {
 # Added exscaping for PS1 using ansi codes see above link.
 PS1="\[\033[2m\]\D{%Y.%m.%d-%H:%M:%S}\[\033[0m\]\[\033[1m\]|\[\033[0m\]\w\[\033[1m\]:\[\033[0m\]"
 export EDITOR=vim
+
+function bphelp {
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+Variables:
+  REPOS_BASE_DIR: $REPOS_BASE_DIR
+  MAC_SETTINGS_HOME: $MAC_SETTINGS_HOME
+  MAC_SETTINGS_SETUP: $MAC_SETTINGS_SETUP
+  UTILITY_SCRIPTS_GITDIR_FILE: $UTILITY_SCRIPTS_GITDIR_FILE
+  OPENDNS_1: $OPENDNS_1
+  OPENDNS_2: $OPENDNS_2
+  CLOUDFLAREDNS_1: $CLOUDFLAREDNS_1
+  CLOUDFLAREDNS_2: $CLOUDFLAREDNS_2
+  GOOGLE_DNS_1: $GOOGLE_DNS_1
+  GOOGLE_DNS_2: $GOOGLE_DNS_2
+  PING_TARGET: $PING_TARGET
+  PS1: $PS1
+  EDITOR: $EDITOR
+
+Aliases:
+  alias pingone="ping -c 1 $PING_TARGET"
+  alias pingfour="ping -c 4 $PING_TARGET"
+  alias pingten="ping -c 10 $PING_TARGET"
+  alias atomcfg="vim /Users/$(whoami)/.atom/config.cson"
+  alias grepc="grep --color=auto"
+  alias ll="ls -la"
+  alias untar='tar -zxvf '
+  alias speed='speedtest-cli --server 2406 --simple'
+  alias whatsmyip="dig +short myip.opendns.com @resolver1.opendns.com"
+  alias ipe='curl ipinfo.io/ip'
+  alias ipi='ipconfig getifaddr en0'
+  alias getweather="curl -4 http://wttr.in/chicago"
+
+Functions:
+  resolvedns
+  bpvi
+  bpcp
+  bpsrc
+  bpcps
+  vifunction
+  itvi
+  itdo
+  cpgitdir
+  getoathtkn
+
+Loaded Function Files:
+HEREDOC_MESSAGE
+`
+  echo "$MESSAGE"
+  for file in $(find $MAC_SETTINGS_HOME/.functions -type f -name '*.*_functions'); do
+    echo "  - $file"
+  done
+  echo " "
+  echo "PATH:"
+  echo "$PATH"
+}
+
+
 # NOTE: Added /usr/local/sbin as suggetsed by brew doctor
 # export PATH="/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:/usr/local/sbin:$PATH"
 
