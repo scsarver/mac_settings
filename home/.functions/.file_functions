@@ -10,52 +10,97 @@ function newsh {
     # locate $SH_FILE
   fi
 
-  NEWSH=$(cat <<"HEREDOCNEWSH"
+  NEWSH1=$(cat <<HEREDOCNEWSH
 #!/usr/bin/env bash
 #
 # Created By: $(whoami)
 # Created Date: $(date +%Y%m%d-%H%M%S)
+HEREDOCNEWSH
+)
+
+  NEWSH2=$(cat <<'HEREDOCNEWSH'
 #
 # Purpose and References: See usage function defined below - ref: https://en.wikipedia.org/wiki/Usage_message
-#
 # Where you want the options to take effect, use set -o option-name or, in short form, set -option-abbrev, To disable an option within a script, use set +o option-name or set +option-abbrev: https://www.tldp.org/LDP/abs/html/options.html
 set +x #xtrace
 set +v #verbose
 set -e #errexit
-set -u #nounset
+# set -u #nounset - This is off by default until the parameter parsing while block usage of $1 forcing an error can be figured out.
+QUIET="false"
+VERBOSE="false"
+LOG_TO_FILE="false"
 SCRIPTDIR="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 SCRIPTNAME="$(basename "$0")"
-LOG_TO_FILE="false"
-LOGFILE="$SCRIPTNAME-$(date +%Y%m%d-%H%M%S).log"
-function log {
-  if [ "true" == "$LOG_TO_FILE" ]; then
-    if [ "" == "$(which tee)" ]; then
-      echo "$1" && echo "$1">>"$LOGFILE"
-    else
-      echo "$1" | tee -a "$LOGFILE"
-    fi
-  else
-    echo "$1"
-  fi
-}
-if [ "true" == "$LOG_TO_FILE" ]; then
-  touch "$LOGFILE"
-fi
+LOGFILE="${SCRIPTNAME%.*}-$(date +%Y%m%d-%H%M%S).log"
+function missing_arg { echo "Error: Argument for $1 is missing" >&2; exit 1; }
+function unsupported_flag { echo "Error: Unsupported flag $1" >&2; exit 1; }
 function usage {
 USAGE=$(cat <<HEREDOCUSAGE
   Usage: $SCRIPTNAME Path:$SCRIPTDIR
+  Purpose:
+    Update me!
+  Flags:
+    -v|--verbose [true|false - default false]- Used to increase the verbosity of output.
+    -q|--quiet   [true|false - default false]- Used to turn off logging and output.
+    -l|--log [true|false - default false]- Used to turn on logging output to a file with the naming pattern [${SCRIPTNAME%.*}-%Y%m%d-%H%M%S.log]
+    -u|--usage - Used to display this usage documentation and exit.
 HEREDOCUSAGE
   )
 echo "$USAGE"
 }
-
-usage
-
+function log {
+  if [ "true" != "$QUIET" ]; then
+    if [ "true" == "$LOG_TO_FILE" ]; then
+      if [ "" == "$(which tee)" ]; then
+        echo "$1" && echo "$1">>"$LOGFILE"
+      else
+        echo "$1" | tee -a "$LOGFILE"
+      fi
+    else
+      echo "$1"
+    fi
+  fi
+}
+if [ "true" == "$LOG_TO_FILE" ]; then
+  touch "$LOGFILE" #This happens after flags are parsed
+fi
 HEREDOCNEWSH
 )
-  echo "$NEWSH">"$SH_FILE"
+
+  echo "$NEWSH1">"$SH_FILE"
+  echo "$NEWSH2">>"$SH_FILE"
+
+  # Note the case statement syntax causes problems when trying to put this text into a file using HEREDOC
+  echo 'while (( "$#" )); do #Referenced: https://medium.com/@Drew_Stokes/bash-argument-parsing-54f3b81a6a8f'>>"$SH_FILE"
+  echo 'case "$1" in'>>"$SH_FILE"
+  echo '    -q|--quiet)export QUIET="true";shift;;'>>"$SH_FILE"
+  echo '    -v|--verbose)'>>"$SH_FILE"
+  echo '      export VERBOSE="true";shift;;'>>"$SH_FILE"
+  echo '    -l|--log)'>>"$SH_FILE"
+  echo '      export LOG_TO_FILE="true";shift;;'>>"$SH_FILE"
+  echo '    -h|-u|--help|--usage )'>>"$SH_FILE"
+  echo '      usage;exit;;'>>"$SH_FILE"
+  echo '    # -ab|--boolean-flag)'>>"$SH_FILE"
+  echo '    #   MY_FLAG=0;shift;;'>>"$SH_FILE"
+  echo '    # -b|--flag-with-argument)'>>"$SH_FILE"
+  echo '    #   if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then'>>"$SH_FILE"
+  echo '    #     MY_FLAG_ARG=$2;shift 2;'>>"$SH_FILE"
+  echo '    #   else'>>"$SH_FILE"
+  echo '    #     missing_arg "$1"'>>"$SH_FILE"
+  echo '    #   fi'>>"$SH_FILE"
+  echo '    #   ;;'>>"$SH_FILE"
+  echo '    -*|--*=) # Error on unsupported flags'>>"$SH_FILE"
+  echo '      unsupported_flag "$1";;'>>"$SH_FILE"
+  echo '    *) # preserve positional arguments'>>"$SH_FILE"
+  echo '      PARAMS="$PARAMS $1";shift;;'>>"$SH_FILE"
+  echo '  esac'>>"$SH_FILE"
+  echo 'done'>>"$SH_FILE"
+  echo 'if [ "true" == "$LOG_TO_FILE" ]; then'>>"$SH_FILE"
+  echo '  touch "$LOGFILE" #This happens after flags are parsed'>>"$SH_FILE"
+  echo 'fi'>>"$SH_FILE"
+
   chmod 740 "$SH_FILE"
-  shellcheck "$SH_FILE"
+  shellcheck -e SC2221,SC2222 "$SH_FILE" #Excluding rule SC2221 because I want to build a string of space seperated parameters which are not tied to a flag.
 }
 
 # Used to pipe the man commands text into a pdf for easier viewing.
