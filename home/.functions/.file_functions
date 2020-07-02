@@ -25,6 +25,7 @@ HEREDOCNEWSH
 set +x #xtrace
 set +v #verbose
 set -e #errexit
+set -o #pipefail #https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 # set -u #nounset - This is off by default until the parameter parsing while block usage of $1 forcing an error can be figured out.
 QUIET="false"
 VERBOSE="false"
@@ -35,7 +36,7 @@ LOGFILE="${SCRIPTNAME%.*}-$(date +%Y%m%d-%H%M%S).log"
 function missing_arg { echo "Error: Argument for $1 is missing" >&2; exit 1; }
 function unsupported_flag { echo "Error: Unsupported flag $1" >&2; exit 1; }
 function usage {
-USAGE=$(cat <<HEREDOCUSAGE
+cat <<HEREDOCUSAGE
   Usage: $SCRIPTNAME Path:$SCRIPTDIR
   Purpose:
     Update me!
@@ -45,8 +46,6 @@ USAGE=$(cat <<HEREDOCUSAGE
     -l|--log [true|false - default false]- Used to turn on logging output to a file with the naming pattern [${SCRIPTNAME%.*}-%Y%m%d-%H%M%S.log]
     -u|--usage - Used to display this usage documentation and exit.
 HEREDOCUSAGE
-  )
-echo "$USAGE"
 }
 function log {
   if [ "true" != "$QUIET" ]; then
@@ -59,6 +58,11 @@ function log {
     else
       echo "$1"
     fi
+  fi
+}
+function vlog {
+  if [ "true" == "$VERBOSE" ]; then
+    log "$1"
   fi
 }
 if [ "true" == "$LOG_TO_FILE" ]; then
