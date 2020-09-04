@@ -3,6 +3,7 @@
 
 alias gs='git status'
 alias gb='git branch'
+alias gbc="git branch --list  | grep '*' | cut -d ' ' -f2"
 alias gp='git pull'
 alias gbr='git branch -r'
 alias glo='git log --oneline'
@@ -15,7 +16,13 @@ alias gdu='git fetch origin;git diff @{upstream}'
 
 function show_parent_branch {
   # https://stackoverflow.com/questions/3161204/find-the-parent-branch-of-a-git-branch
+  # I do not tink this works correctly!!!!
   git show-branch | grep '*' | grep -v "$(git rev-parse --abbrev-ref HEAD)" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//'
+
+
+  # git log --first-parent -n 5 --grep-reflog "$(git branch --list| grep '*' | cut -d ' ' -f2)" --walk-reflogs
+
+
 }
 
 function gd {
@@ -48,6 +55,34 @@ function gd {
   echo "============================================================"
 }
 
+function gpsh {
+  local GIT_PUSH_OUT="$(git push -n 2>&1 && true )"
+  local GIT_REMOTE="$(git remote)"
+  local GIT_BRANCH="$(git branch --show-current)"
+  local GIT_PUSH='git push'
+  if [ "Everything up-to-date" == "$GIT_PUSH_OUT" ]; then
+    echo "$GIT_PUSH_OUT"
+  else
+    while read -r line
+    do
+        if [[ "$line" == *'set-upstream'* ]]; then
+          GIT_PUSH="$line"
+        fi
+    done <<< "$GIT_PUSH_OUT"
+    echo "Do you want to push '$GIT_BRANCH' to '$GIT_REMOTE' - [$GIT_PUSH] ?"
+    read PUSH_REMOTE_ANSWER
+    if [ "y" == "$PUSH_REMOTE_ANSWER" ] ||
+      [ "Y" == "$PUSH_REMOTE_ANSWER" ] ||
+      [ "yes" == "$PUSH_REMOTE_ANSWER" ] ||
+      [ "YES" == "$PUSH_REMOTE_ANSWER" ] ||
+      [ "Yes" == "$PUSH_REMOTE_ANSWER" ]; then
+      # TODO: Capture output and prompt for automatically opening to the pull request page!
+      `$GIT_PUSH`
+    else
+      echo "Aborted!"
+    fi
+  fi
+}
 
 function githelp {
 
@@ -62,8 +97,14 @@ Is there a git-merge --dry-run option?
      To undo the merge, even if it is a fast-forward merge
      git merge --abort
 
+     To view the staged changes:
+     git diff --cached
+
      You can also use git diff to compare between local and remote branches
      git diff master origin/master
+
+ Links:
+   Emojis in github markdown: https://gist.github.com/rxaviers/7360908
 
  Aliases:
    alias gs='git status'
@@ -80,6 +121,11 @@ Is there a git-merge --dry-run option?
  Functions:
    function show_parent_branch -
    function gd - git diff helper
+   function gpsh - git push helper will fish out the set upstream command and prompt you to execute it.
+
+TODO
+    Does git config pose an issue for tags and releases if the timezonee is not set?
+       - https://stackoverflow.com/questions/7651644/git-timezone-and-timestamp-format
 
 HEREDOC_MESSAGE
 `

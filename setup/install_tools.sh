@@ -20,9 +20,11 @@ homebrew_packages=(
   'bash-completion'
   'shellcheck'
   'git'
+  'icdiff'
   'python'
   'python3'
   'pipenv'
+  'pipx'
   'jq'
   'yq'
   'awscli'
@@ -39,11 +41,13 @@ homebrew_packages=(
   'rukenshia/repo/saml2aws-auto' # From tap rukenshia/repo
   #'terraforming'
   'rbenv'
+  'sonar-scanner'
   )
 
 homebrew_casks=(
   'google-chrome'
   'atom'
+  'visual-studio-code'
   #'virtualbox'
   #'vagrant'
   #'slack'
@@ -61,6 +65,7 @@ homebrew_casks=(
   'powershell'
   'rocket-chat'
   'postman'
+  'drawio'
 )
 
 homebrew_taps=(

@@ -25,14 +25,14 @@ HEREDOCNEWSH
 set +x #xtrace
 set +v #verbose
 set -e #errexit
-set -o #pipefail #https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 # set -u #nounset - This is off by default until the parameter parsing while block usage of $1 forcing an error can be figured out.
 QUIET="false"
 VERBOSE="false"
 LOG_TO_FILE="false"
-SCRIPTDIR="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
-SCRIPTNAME="$(basename "$0")"
-LOGFILE="${SCRIPTNAME%.*}-$(date +%Y%m%d-%H%M%S).log"
+readonly SCRIPTDIR="$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+readonly SCRIPTNAME="$(basename "$0")"
+readonly LOGFILE="${SCRIPTNAME%.*}-$(date +%Y%m%d-%H%M%S).log"
 function missing_arg { echo "Error: Argument for $1 is missing" >&2; exit 1; }
 function unsupported_flag { echo "Error: Unsupported flag $1" >&2; exit 1; }
 function usage {
@@ -47,6 +47,7 @@ cat <<HEREDOCUSAGE
     -u|--usage - Used to display this usage documentation and exit.
 HEREDOCUSAGE
 }
+# Consider enhancing with color logging some examples found here: https://github.com/docker/docker-bench-security/blob/master/output_lib.sh
 function log {
   if [ "true" != "$QUIET" ]; then
     if [ "true" == "$LOG_TO_FILE" ]; then
@@ -68,6 +69,12 @@ function vlog {
 if [ "true" == "$LOG_TO_FILE" ]; then
   touch "$LOGFILE" #This happens after flags are parsed
 fi
+
+readonly REQUIRED_SOFTWARE='aws jq yq'
+for REQUIRED in $REQUIRED_SOFTWARE; do
+  command -v "$REQUIRED" >/dev/null 2>&1 || { printf "%s command not found.\n" "$REQUIRED"; exit 1; }
+done
+
 HEREDOCNEWSH
 )
 
@@ -160,6 +167,10 @@ prettyjson_w() {
 function filehelp {
 
 MESSAGE=`cat <<HEREDOC_MESSAGE
+
+Diff tools (Not git specific):
+  icdiff - side by side terminal diff tool
+  Meld - GUI file and directory comparison tool
 
 aliases:
   alias cdrepos="cd $REPOS_BASE_DIR"

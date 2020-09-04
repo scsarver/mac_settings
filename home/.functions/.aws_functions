@@ -1,11 +1,29 @@
 alias awsacctalias="aws iam list-account-aliases | jq -r \".AccountAliases[0]\""
 alias awsgetcaller="aws sts get-caller-identity"
+alias awsgetacct="aws sts get-caller-identity --query 'Account' --output text"
 alias awsunsetcreds="unset AWS_SHARED_CREDENTIALS_FILE"
 alias awscheckcreds="printenv | grep AWS_SHARED_CREDENTIALS_FILE"
 alias awsunsetprofile="unset AWS_PROFILE"
 alias awscheckprofile="printenv | grep AWS_PROFILE"
 alias awscheck="printenv | grep AWS_"
 alias awswhoami="aws iam list-account-aliases | jq -r \".AccountAliases[0]\";aws sts get-caller-identity"
+
+
+
+function awscmd {
+  local AWCCLI_COMMAND
+  local AWCCLI_RESPONSE="$($AWCCLI_COMMAND 2>&1 || true)"
+  if [[ "$AWCCLI_RESPONSE" == *'An error occurred'* ]]; then
+    log "ERROR: $AWCCLI_RESPONSE"
+    exit 1
+  else
+    echo "Implement me to pass a call but wrap with exception handling!!"
+    log "$AWCCLI_RESPONSE"
+  fi
+}
+
+
+
 
 function awssetcreds {
     export AWS_SHARED_CREDENTIALS_FILE="$1"
@@ -125,6 +143,19 @@ Functions:
   awsssminventory
   awsgetinstancedata
   awsacctnumberfromarn
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+}
+
+function awsref {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+  Training and Certification:
+   - https://pages.awscloud.com/AWS-Traincert_Ramp-up_Guides.html
+
 
 HEREDOC_MESSAGE
 `

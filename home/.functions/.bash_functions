@@ -239,3 +239,38 @@ cecho(){
 #    some_work ...
 # done
 # endspin
+
+
+function bashref {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+aliases:
+  N/A
+
+functions:
+  showenvlike
+  unsetenvlike
+  setstyle
+  endstyle
+  get_ansi_code_prefix
+  get_ansi_code_suffix
+  get_ansi_code
+  cecho - echo in color use like: echo Red "This test is colored red!"
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+}
+
+
+function bashref {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+  Links:
+    - Help message for Shell - https://samizdat.dev/help-message-for-shell-scripts/
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+}

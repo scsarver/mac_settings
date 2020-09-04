@@ -1,0 +1,22 @@
+function funref {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+  Links:
+    - Hacker typer - https://hackertyper.net/#
+
+  Commands:
+    - Star Wars in the Terminal - telnet towel.blinkenlights.nl
+
+  Social games:
+    - Railroad Ink - https://www.dropbox.com/s/tyvz8my2u5j7cgx/RRI_BOARD_PNP_2020_SU%26SD.pdf?dl=0
+    - Just one - https://just1.herokuapp.com
+    - Codenames - https://horsepaste.com
+    - Wavelength - https://heretothere.app/
+    - Spyfall - https://spyfall.tannerkrewson.com
+    - Jackbox – https://jackbox.tv
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+}
