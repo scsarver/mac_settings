@@ -84,6 +84,65 @@ function gpsh {
   fi
 }
 
+function gro {
+  local FETCH_OR_PUSH="fetch"
+  if [ "" != "$1" ] && [ "push" != "$1" ]; then
+    echo "The FETCH_OR_PUSH parameter can only be 'push', the value passed in was: [$1] - to use the default of 'fetch' no parameter is required."
+  else
+    local GIT_REMOTE_URLS=("$(git remote -v 2>&1| grep "($FETCH_OR_PUSH)" | cut -f 2 | cut -d ' ' -f 1 )")
+    for  GIT_REMOTE_URL in ${GIT_REMOTE_URLS[@]}
+    do
+      local GIT_REMOTE_TRMMED="${GIT_REMOTE_URL##*https://}"
+      local GIT_ORG_TRIMMED="${GIT_REMOTE_TRMMED#*/}"
+      local GIT_ORG="${GIT_ORG_TRIMMED%/*}"
+      echo "$GIT_ORG"
+    done
+  fi
+}
+
+function grh {
+  local FETCH_OR_PUSH="fetch"
+  if [ "" != "$1" ] && [ "push" != "$1" ]; then
+    echo "The FETCH_OR_PUSH parameter can only be 'push', the value passed in was: [$1] - to use the default of 'fetch' no parameter is required."
+  else
+    local GIT_REMOTE_URLS=("$(git remote -v 2>&1| grep "($FETCH_OR_PUSH)" | cut -f 2 | cut -d ' ' -f 1 )")
+    for  GIT_REMOTE_URL in ${GIT_REMOTE_URLS[@]}
+    do
+      local GIT_REMOTE_TRMMED="${GIT_REMOTE_URL##*https://}"
+      local GIT_ORG_TRIMMED="${GIT_REMOTE_TRMMED%/*}"
+      local GIT_ORG="${GIT_ORG_TRIMMED%/*}"
+      echo "${GIT_ORG}"
+    done
+  fi
+}
+
+function gcrh {
+  if [ "" == "$2" ] -o [ "" == "$1" ]; then
+    echo "Github organization and repository name are required!"
+  else
+    local GITHUB_BASE="github.com"
+    local GITHUB_BASE="github.platform.vwfs.io"
+    local GITHUB_ORG="$1"
+    local GITHUB_REPO="$2"
+    local SUFFIX=".git"
+    local GITHUB_CON="https://${GITHUB_BASE}/${GITHUB_ORG}/${GITHUB_REPO}${SUFFIX}"
+    git clone "${GITHUB_CON}"
+  fi
+}
+
+function gcrs {
+  if [ "" == "$2" ] -o [ "" == "$1" ]; then
+    echo "Github organization and repository name are required!"
+  else
+    local GITHUB_BASE="github.com"
+    local GITHUB_BASE="github.platform.vwfs.io"
+    local GITHUB_ORG="$1"
+    local SUFFIX=".git"
+    local GITHUB_CON="git@${GITHUB_BASE}:${GITHUB_ORG}/${2}${SUFFIX}"
+    git clone "${GITHUB_CON}"
+  fi
+}
+
 function githelp {
 
 MESSAGE=`cat <<HEREDOC_MESSAGE
@@ -122,6 +181,10 @@ Is there a git-merge --dry-run option?
    function show_parent_branch -
    function gd - git diff helper
    function gpsh - git push helper will fish out the set upstream command and prompt you to execute it.
+   function gro - get the git organization from the git remotes command.
+   function grh - get the git host from the git remotes command.
+   function gcrh - git clone using https (TODO: Fix hardcoded github endpoint) with passed in repository name
+   function gcrs - git clone using ssh (TODO: Fix hardcoded github endpoint) with passed in repository name
 
 TODO
     Does git config pose an issue for tags and releases if the timezonee is not set?

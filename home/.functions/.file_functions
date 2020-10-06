@@ -72,7 +72,7 @@ fi
 
 readonly REQUIRED_SOFTWARE='aws jq yq'
 for REQUIRED in $REQUIRED_SOFTWARE; do
-  command -v "$REQUIRED" >/dev/null 2>&1 || { printf "%s command not found.\n" "$REQUIRED"; exit 1; }
+  command -v "$REQUIRED" >/dev/null 2>&1 || { printf "%s command not found and is required for [$SCRIPTNAME].\n" "$REQUIRED"; exit 1; }
 done
 
 HEREDOCNEWSH
@@ -129,6 +129,8 @@ function mknote {
 alias cdrepos="cd $REPOS_BASE_DIR"
 alias cdsc="cd $REPOS_BASE_DIR/scsarver"
 alias cdproto="cd $REPOS_BASE_DIR/prototype"
+alias psg="ps aux | grep -v grep | grep -i -e VSZ -e" #Find a processes info by name
+alias histg="history | grep" #grep the history
 
 function cdiac {
     local CURRENT_START_PATH="$(pwd)"
@@ -176,6 +178,8 @@ aliases:
   alias cdrepos="cd $REPOS_BASE_DIR"
   alias cdsc="cd $REPOS_BASE_DIR/scsarver"
   alias cdproto="cd $REPOS_BASE_DIR/prototype"
+  alias psg="ps aux | grep -v grep | grep -i -e VSZ -e" #Find a processes info by name
+  alias histg="history | grep" #grep the history
 
 functions:
   newsh - Creates a template for a new shell script if passed a name the script will get the passed in name.

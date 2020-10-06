@@ -1,0 +1,31 @@
+function dockerhelp {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+notes:
+  N/A
+
+aliases
+  drit - docker container run -it - Runs a docker image in interactive mode as the supplied parameter.
+  drita - docker container run -it alpine - Runs a docker apline image in interactive mode.
+
+
+functions:
+  N/A
+
+references:
+  AwesomeDocker - https://github.com/veggiemonk/awesome-docker
+  Docker linter - https://github.com/hadolint/hadolint
+  Docker container scanner - https://github.com/aquasecurity/trivy
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+}
+
+alias drita="docker container run -it alpine"
+alias drit="docker container run -it"
+
+function dritl {
+  docker run -it "$(docker images -a | grep $1 | awk '{print $3}')" /bin/sh
+}

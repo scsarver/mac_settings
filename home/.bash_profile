@@ -4,7 +4,8 @@ REPOS_BASE_DIR="/Users/$(whoami)/Documents/repos"
 MAC_SETTINGS_HOME="$REPOS_BASE_DIR/scsarver/mac_settings/home"
 MAC_SETTINGS_SETUP="$REPOS_BASE_DIR/scsarver/mac_settings/setup"
 
-UTILITY_SCRIPTS_GITDIR_FILE="$REPOS_BASE_DIR/scsarver/utility_scripts/gitdir"
+UTILITY_SCRIPTS_REPO="$REPOS_BASE_DIR/scsarver/utility_scripts"
+UTILITY_SCRIPTS_GITDIR_FILE="$UTILITY_SCRIPTS_REPO/gitdir"
 
 OPENDNS_1="208.67.222.222"
 OPENDNS_2="208.67.220.220"

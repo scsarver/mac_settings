@@ -7,8 +7,26 @@ alias awsunsetprofile="unset AWS_PROFILE"
 alias awscheckprofile="printenv | grep AWS_PROFILE"
 alias awscheck="printenv | grep AWS_"
 alias awswhoami="aws iam list-account-aliases | jq -r \".AccountAliases[0]\";aws sts get-caller-identity"
+alias awscfnhelper="bash $UTILITY_SCRIPTS_REPO/cloudformation/cfnhelper.sh"
 
-
+function awsextractcreds {
+  unset AWS_PROFILE
+  unset AWS_SHARED_CREDENTIALS_FILE
+  if [ "" == "$1" ]; then
+    echo "Passing the profile to extract credentials for is required!"
+  else
+    local ACCESS_KEY="$(aws configure get aws_access_key_id --profile $1 )"
+    if [ "The config profile ($1) could not be found" == "$ACCESS_KEY" ]; then
+      echo "$ACCESS_KEY"
+    else
+      touch awscreds
+      echo "[default]">awscreds
+      echo "aws_access_key_id=$(aws configure get $1.aws_access_key_id)">>awscreds
+      echo "aws_secret_access_key=$(aws configure get $1.aws_secret_access_key)">>awscreds
+      echo "aws_session_token=$(aws configure get $1.aws_session_token)">>awscreds
+    fi
+  fi
+}
 
 function awscmd {
   local AWCCLI_COMMAND
@@ -37,6 +55,11 @@ function awssetregion {
     export AWS_REGION="$1"
 }
 
+function awssetdefault {
+    export AWS_DEFAULT_REGION="us-east-1"
+    export AWS_PAGER=""
+}
+
 function awsunset {
   #https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
   unset AWS_ACCESS_KEY_ID
@@ -58,6 +81,7 @@ function awsunset {
 
 #Install SSM Manager plugin
 # Reference: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+#            https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-prereqs.html
 # curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac/sessionmanager-bundle.zip" -o "sessionmanager-bundle.zip"
 # unzip sessionmanager-bundle.zip
 # sudo ./sessionmanager-bundle/install -i /usr/local/sessionmanagerplugin -b /usr/local/bin/session-manager-plugin
@@ -125,24 +149,29 @@ function awshelp {
 
 MESSAGE=`cat <<HEREDOC_MESSAGE
 Aliases:
-  awsacctalias
-  awsgetcaller
-  awsunsetcreds
-  awscheckcreds
-  awsunsetprofile
-  awscheckprofile
-  awscheck
-  awswhoami
+  awsacctalias - Show account aliases for current credentials
+  awsgetcaller - Show current credentials
+  awswhoami - Show current credentials
+  awsunsetcreds - unset the AWS_SHARED_CREDENTIALS_FILE environment variabe
+  awscheckcreds - Show what is set as the environment variable for AWS_SHARED_CREDENTIALS_FILE
+  awsunsetprofile - unset the AWS_PROFILE environment variabe
+  awscheckprofile - Show what is set as the environment variable for AWS_PROFILE
+  awscheck - Show what is set as the environment variables matching AWS_*
+  awscfnhelper - Alias to the cloudformation helper script found in ~/Documents/repos/scsarver/utility_scripts/cloudformation
 
 Functions:
-  awssetcreds
-  awssetprofile
-  awssetregion
-  awsunset
-  awsssmto
-  awsssminventory
-  awsgetinstancedata
-  awsacctnumberfromarn
+  awssetcreds - Sets the AWS_SHARED_CREDENTIALS_FILE environment variable
+  awssetprofile - Sets the AWS_PROFILE environment variable
+  awssetregion - Sets the AWS_REGION environment variable
+  awsunset - unsets all known AWS_* environment variables.
+  awsssmto - Finds a matching ec2 instance and starts an ssm session
+  awsssminventory - Show ec2 instances data for instance that can use ssm.
+  awsgetinstancedata - Extract the id, ami and Name Tag for ec2 instances matching the suppled value against the Name tag.
+  awsacctnumberfromarn - Extracts the account number from an ARN (Amazon Resource Name)
+  awsextractcreds - Extract a credentials file from the standard location into the current directory as [default]
+
+TODO:
+  awscmd - function - pass a cli call but wrap with exception handling
 
 HEREDOC_MESSAGE
 `

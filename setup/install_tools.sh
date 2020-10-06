@@ -27,6 +27,7 @@ homebrew_packages=(
   'pipx'
   'jq'
   'yq'
+  'xmlstarlet'
   'awscli'
   'golang'
   'groovy'
@@ -46,6 +47,7 @@ homebrew_packages=(
 
 homebrew_casks=(
   'google-chrome'
+  'chromedriver' # For selenium
   'atom'
   'visual-studio-code'
   #'virtualbox'
@@ -66,6 +68,7 @@ homebrew_casks=(
   'rocket-chat'
   'postman'
   'drawio'
+  'session-manager-plugin' # AWS SSM session manager
 )
 
 homebrew_taps=(
