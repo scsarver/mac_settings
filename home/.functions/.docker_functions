@@ -11,7 +11,7 @@ aliases
 
 
 functions:
-  N/A
+  drcfnnag - docker container run stelligent/cfn_nag settign volume to the current directory and passing the file to scan.
 
 references:
   AwesomeDocker - https://github.com/veggiemonk/awesome-docker
@@ -28,4 +28,16 @@ alias drit="docker container run -it"
 
 function dritl {
   docker run -it "$(docker images -a | grep $1 | awk '{print $3}')" /bin/sh
+}
+
+function drcfnnag {
+  if [ "" == "$1" ]; then
+    echo "Passing a cloudformation template file name is required!"
+  else
+    if [ -f "$1" ]; then
+      docker run -v `pwd`:/templates -t stelligent/cfn_nag /templates/$1
+    else
+      echo "The file name supplied was not found: [$1]"
+    fi
+  fi
 }

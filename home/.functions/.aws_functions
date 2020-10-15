@@ -145,6 +145,49 @@ function awsacctnumberfromarn {
   fi
 }
 
+function awsfindsecret {
+  if [ "" == "$1" ]; then
+    echo "Passing a string to match the secret name against is required!"
+  else
+    local SECRET_ARN="$(aws secretsmanager list-secrets --query "SecretList[?Name | contains(@,'$1')].ARN" --output text 2>&1 || true)"
+    echo "Found secret for: [$1]"
+    echo " "
+    echo "$SECRET_ARN"
+    echo " "
+    echo "To look up the secret value use:"
+    echo " aws secretsmanager get-secret-value --secret-id $SECRET_ARN"
+  fi
+}
+
+function awslistcfn {
+  local STACK_NAMES="$(aws cloudformation describe-stacks --query "Stacks[*].StackName" --output text)"
+  for STACK_NAME in ${STACK_NAMES[@]}
+  do
+    echo "$STACK_NAME"
+  done
+}
+
+function awsfindcfn {
+  if [ "" == "$1" ]; then
+    echo "Passing a string to match the cloudformation stack name against is required!"
+  else
+    aws cloudformation describe-stacks --query "Stacks[?StackName | contains(@,'$1')].StackName" --output text
+  fi
+}
+
+function awss3countobjects {
+  if [ "" == "$1" ]; then
+    echo "Passing the s3 bucket name required!"
+  else
+    local RESPONSE="$(aws s3api list-objects --bucket "$1" --query "Contents | length(@)" --no-paginate 2>&1)"
+    if [[ *${RESPONSE}* == *"In function length(), invalid type for value: None, expected one of:"* ]]; then
+      echo "0"
+    else
+      echo "${RESPONSE}"
+    fi
+  fi
+}
+
 function awshelp {
 
 MESSAGE=`cat <<HEREDOC_MESSAGE
@@ -169,6 +212,10 @@ Functions:
   awsgetinstancedata - Extract the id, ami and Name Tag for ec2 instances matching the suppled value against the Name tag.
   awsacctnumberfromarn - Extracts the account number from an ARN (Amazon Resource Name)
   awsextractcreds - Extract a credentials file from the standard location into the current directory as [default]
+  awss3countobjects - Returns a count of objects in the s3 bucket
+  awsfindsecret - Finds an AWS Secret matching the supplied string.
+  awslistcfn - Lists cloudformation stack names
+  awsfindcfn - Finds a cloudformation stack name matched to the supplied string
 
 TODO:
   awscmd - function - pass a cli call but wrap with exception handling
@@ -185,6 +232,7 @@ MESSAGE=`cat <<HEREDOC_MESSAGE
   Training and Certification:
    - https://pages.awscloud.com/AWS-Traincert_Ramp-up_Guides.html
 
+   JMESPATH - https://jmespath.org/tutorial.html
 
 HEREDOC_MESSAGE
 `

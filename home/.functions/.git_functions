@@ -25,6 +25,35 @@ function show_parent_branch {
 
 }
 
+function ginit {
+  local NEW_REPO="$1"
+  local GITHUB_BASE="github.com"
+  local GIT_ORG="scsarver"
+  if [ "" == "$NEW_REPO" ]; then
+    echo "A repository name is required!"
+  else
+    if [ -d "$NEW_REPO" ]; then
+      echo "A directory already exists with the name: [$NEW_REPO] in the current working directory: [$(pwd)]"
+    else
+      mkdir "$NEW_REPO"
+      cd "$NEW_REPO"
+      touch README.md
+      echo "# $NEW_REPO">README.md
+      git init
+      git add README.md
+      git commit -m "first commit"
+
+      curl -u "$GIT_ORG" https://api.${GITHUB_BASE}/user/repos -d "{\"name\":\"${NEW_REPO}\"}"
+
+      # git remote add origin git@${GITHUB_BASE}:${GIT_ORG}/${NEW_REPO}.git
+      git remote add origin https://${GITHUB_BASE}/${GIT_ORG}/${NEW_REPO}.git
+      git push -u origin master
+  fi
+ fi
+}
+
+
+
 function gd {
   local git_status_list_position_index="0"
   local count=0
@@ -161,6 +190,8 @@ Is there a git-merge --dry-run option?
 
      You can also use git diff to compare between local and remote branches
      git diff master origin/master
+
+
 
  Links:
    Emojis in github markdown: https://gist.github.com/rxaviers/7360908
