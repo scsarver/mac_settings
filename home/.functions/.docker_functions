@@ -7,11 +7,15 @@ notes:
 
 aliases
   drit - docker container run -it - Runs a docker image in interactive mode as the supplied parameter.
-  drita - docker container run -it alpine - Runs a docker apline image in interactive mode.
-
+  drita - docker container run -it alpine - Runs a docker alpine image in interactive mode.
+  drlint - docker container run --rm -i hadolint/hadolint < Dockerfile - Runs hadolint docker container to lint your dockerfile.
+  dkillall - docker kill all running containers.
 
 functions:
   drcfnnag - docker container run stelligent/cfn_nag settign volume to the current directory and passing the file to scan.
+  drlimit - Show the rate limit
+  dimid - Show the image hash matched to the provided name
+  dritl - docker container run -it /bin/sh matching on the passed in text.
 
 references:
   AwesomeDocker - https://github.com/veggiemonk/awesome-docker
@@ -23,12 +27,11 @@ HEREDOC_MESSAGE
 echo "$MESSAGE"
 }
 
-alias drita="docker container run -it alpine"
 alias drit="docker container run -it"
+alias drita="docker container run -it alpine"
+alias drlint="docker run --rm -i hadolint/hadolint < Dockerfile"
+alias dkillall="docker kill $(docker ps -q)"
 
-function dritl {
-  docker run -it "$(docker images -a | grep $1 | awk '{print $3}')" /bin/sh
-}
 
 function drcfnnag {
   if [ "" == "$1" ]; then
@@ -37,7 +40,33 @@ function drcfnnag {
     if [ -f "$1" ]; then
       docker run -v `pwd`:/templates -t stelligent/cfn_nag /templates/$1
     else
-      echo "The file name supplied was not found: [$1]"
+      if [ -d "$1" ]; then
+        docker run -v `pwd`:/templates -t stelligent/cfn_nag /templates/
+      else
+        echo "The file name/directory supplied was not found: [$1]"
+      fi
     fi
   fi
+}
+
+# See documentatoin here for dockerhiub rate limits: https://docs.docker.com/docker-hub/download-rate-limit/
+function drlimit {
+  if [ "" == "$1" ]; then
+    echo "Passing a dockerhub container image name is required!"
+  else
+    local TOKEN=$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$1:pull" | jq -r .token)
+    curl --head -H "Authorization: Bearer $TOKEN" "https://registry-1.docker.io/v2/$1/manifests/latest"
+  fi
+}
+
+function dimid {
+  if [ "" == "$1" ]; then
+    echo "Passing a docker image name to match on is required!"
+  else
+    docker images ls --filter "reference=$1" | tr -s ' ' | cut -d' ' -f 3 | grep -v IMAGE
+  fi
+}
+
+function dritl {
+  docker run -it "$(docker images -a | grep $1 | awk '{print $3}')" /bin/sh
 }

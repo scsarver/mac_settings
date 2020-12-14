@@ -4,15 +4,16 @@
 # Created Date: 2017.08.16.11.28.27
 #
 
-user_name=''
-user_id=''
-user_email=''
+user_name="$(whoami)"
+git_user_id='stephan-sarver'
+user_email='stephan.sarver@vwcredit.com'
 home_dir="/Users/$user_name"
 
-git config --global user.name "$user_name"
+git config --global user.name "$git_user_id"
 git config --global user.email "$user_email"
 git config --global core.editor vim
 git config --global credential.helper store
+git config --global help.autocorrect 1
 
 git config --list
 

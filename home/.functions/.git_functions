@@ -12,6 +12,7 @@ alias glp="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset 
 alias gdo='git diff --name-status origin/master master'
 alias gdol='git diff master..origin/master'
 alias gdu='git fetch origin;git diff @{upstream}'
+alias gconf="source $REPOS_BASE_DIR/scsarver/mac_settings/setup/setup_git.sh"
 
 
 function show_parent_branch {
@@ -23,6 +24,15 @@ function show_parent_branch {
   # git log --first-parent -n 5 --grep-reflog "$(git branch --list| grep '*' | cut -d ' ' -f2)" --walk-reflogs
 
 
+}
+
+
+function gcount {
+  git rev-list --count
+}
+
+function gclean {
+  git gc --prune=now --aggressive
 }
 
 function ginit {
@@ -195,6 +205,7 @@ Is there a git-merge --dry-run option?
 
  Links:
    Emojis in github markdown: https://gist.github.com/rxaviers/7360908
+   Tips & tricks: https://opensource.com/article/20/10/advanced-git-tips
 
  Aliases:
    alias gs='git status'
@@ -210,6 +221,8 @@ Is there a git-merge --dry-run option?
 
  Functions:
    function show_parent_branch -
+   function gcount - counts the commits for the current repo
+   function gclean - will clean up unreachable or "orphaned" Git objects in your repository
    function gd - git diff helper
    function gpsh - git push helper will fish out the set upstream command and prompt you to execute it.
    function gro - get the git organization from the git remotes command.

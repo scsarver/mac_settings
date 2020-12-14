@@ -72,7 +72,7 @@ fi
 
 readonly REQUIRED_SOFTWARE='aws jq yq'
 for REQUIRED in $REQUIRED_SOFTWARE; do
-  command -v "$REQUIRED" >/dev/null 2>&1 || { printf "%s command not found and is required for [$SCRIPTNAME].\n" "$REQUIRED"; exit 1; }
+  command -v "$REQUIRED" >/dev/null 2>&1 || { printf "%s command not found and is required to be installed to use the script [$SCRIPTNAME].\n" "$REQUIRED"; exit 1; }
 done
 
 HEREDOCNEWSH
