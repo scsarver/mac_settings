@@ -27,6 +27,7 @@ set +v #verbose
 set -e #errexit
 set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 # set -u #nounset - This is off by default until the parameter parsing while block usage of $1 forcing an error can be figured out.
+SHELLCHECK="false"
 QUIET="false"
 VERBOSE="false"
 LOG_TO_FILE="false"
@@ -37,7 +38,7 @@ function missing_arg { echo "Error: Argument for $1 is missing" >&2; exit 1; }
 function unsupported_flag { echo "Error: Unsupported flag $1" >&2; exit 1; }
 function usage {
 cat <<HEREDOCUSAGE
-  Usage: $SCRIPTNAME Path:$SCRIPTDIR
+  Usage: $SCRIPTNAME Path: $SCRIPTDIR
   Purpose:
     Update me!
   Flags:
@@ -45,6 +46,7 @@ cat <<HEREDOCUSAGE
     -q|--quiet   [true|false - default false]- Used to turn off logging and output.
     -l|--log [true|false - default false]- Used to turn on logging output to a file with the naming pattern [${SCRIPTNAME%.*}-%Y%m%d-%H%M%S.log]
     -u|--usage - Used to display this usage documentation and exit.
+    -z|--shellcheck [true|false] - default false - Used to run shellcheck against this script.
 HEREDOCUSAGE
 }
 # Consider enhancing with color logging some examples found here: https://github.com/docker/docker-bench-security/blob/master/output_lib.sh
@@ -66,15 +68,12 @@ function vlog {
     log "$1"
   fi
 }
-if [ "true" == "$LOG_TO_FILE" ]; then
-  touch "$LOGFILE" #This happens after flags are parsed
-fi
-
-readonly REQUIRED_SOFTWARE='aws jq yq'
+readonly REQUIRED_SOFTWARE='shellcheck tput aws jq yq'
 for REQUIRED in $REQUIRED_SOFTWARE; do
   command -v "$REQUIRED" >/dev/null 2>&1 || { printf "%s command not found and is required to be installed to use the script [$SCRIPTNAME].\n" "$REQUIRED"; exit 1; }
 done
-
+BOLD_TEXT=$(tput bold)
+NORMAL_TEXT=$(tput sgr0)
 HEREDOCNEWSH
 )
 
@@ -84,11 +83,12 @@ HEREDOCNEWSH
   # Note the case statement syntax causes problems when trying to put this text into a file using HEREDOC
   echo 'while (( "$#" )); do #Referenced: https://medium.com/@Drew_Stokes/bash-argument-parsing-54f3b81a6a8f'>>"$SH_FILE"
   echo 'case "$1" in'>>"$SH_FILE"
+  echo '    -z|--shellcheck)export SHELLCHECK="true";shift;;'>>"$SH_FILE"
   echo '    -q|--quiet)export QUIET="true";shift;;'>>"$SH_FILE"
   echo '    -v|--verbose)'>>"$SH_FILE"
   echo '      export VERBOSE="true";shift;;'>>"$SH_FILE"
   echo '    -l|--log)'>>"$SH_FILE"
-  echo '      export LOG_TO_FILE="true";shift;;'>>"$SH_FILE"
+  echo '      export LOG_TO_FILE="true";touch "$LOGFILE";shift;;'>>"$SH_FILE"
   echo '    -h|-u|--help|--usage )'>>"$SH_FILE"
   echo '      usage;exit;;'>>"$SH_FILE"
   echo '    # -ab|--boolean-flag)'>>"$SH_FILE"
@@ -106,8 +106,11 @@ HEREDOCNEWSH
   echo '      PARAMS="$PARAMS $1";shift;;'>>"$SH_FILE"
   echo '  esac'>>"$SH_FILE"
   echo 'done'>>"$SH_FILE"
-  echo 'if [ "true" == "$LOG_TO_FILE" ]; then'>>"$SH_FILE"
-  echo '  touch "$LOGFILE" #This happens after flags are parsed'>>"$SH_FILE"
+  echo ' '>>"$SH_FILE"
+  echo 'if [ "true" == "$SHELLCHECK" ]; then'>>"$SH_FILE"
+  echo '  echo "shellcheck $SCRIPTNAME - Supressing 2 rules: SC2221 & SC2222 - the line it complains about is written to intentionally catch unsupported flags passed to this script."'>>"$SH_FILE"
+  echo '  shellcheck -e SC2221 -e SC2222 "$SCRIPTNAME"'>>"$SH_FILE"
+  echo '  exit'>>"$SH_FILE"
   echo 'fi'>>"$SH_FILE"
 
   chmod 740 "$SH_FILE"
@@ -166,6 +169,14 @@ prettyjson_w() {
     curl "$1" | python -m json.tool
 }
 
+function fileputcontent {
+  if [ "" == "$1" ]; then
+    echo "Passing the content to open is required!"
+  else
+    echo "$1" | open -f
+  fi
+}
+
 function filehelp {
 
 MESSAGE=`cat <<HEREDOC_MESSAGE
@@ -190,6 +201,7 @@ functions:
   prettyjson_s
   prettyjson_f
   prettyjson_w
+  fileputcontent - Used to put content into an open TextEdit window.
 
 HEREDOC_MESSAGE
 `

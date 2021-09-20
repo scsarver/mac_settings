@@ -240,8 +240,16 @@ cecho(){
 # done
 # endspin
 
+function check_array_membership {
+  INPUT_ARRAY=($@)
+  COMPARE_VALUE="${INPUT_ARRAY[0]}"
+  COMPARE_ARRAY=( ${INPUT_ARRAY[@]:1} )
+  # echo "${INPUT_ARRAY[@]}  - [$COMPARE_VALUE] - (${COMPARE_ARRAY[@]})"
+  [[ " ${COMPARE_ARRAY[@]} " =~ " ${COMPARE_VALUE} " ]] && echo "true" || echo "false"
+}
 
-function bashref {
+
+function bashhelp {
 
 MESSAGE=`cat <<HEREDOC_MESSAGE
 
@@ -257,6 +265,9 @@ functions:
   get_ansi_code_suffix
   get_ansi_code
   cecho - echo in color use like: echo Red "This test is colored red!"
+  check_array_membership - checks if the supplied value is contained by the array
+    - example: check_array_membership "warning"  "\${STATUSES[@]}"
+
 
 HEREDOC_MESSAGE
 `

@@ -16,6 +16,8 @@ functions:
   drlimit - Show the rate limit
   dimid - Show the image hash matched to the provided name
   dritl - docker container run -it /bin/sh matching on the passed in text.
+  debash - docker exec --it <yourcontainer id> bash - Runs an interactive bash shell on your container
+  desh - docker exec --it <yourcontainer id> sh - Runs an interactive shell on your container
 
 references:
   AwesomeDocker - https://github.com/veggiemonk/awesome-docker
@@ -28,10 +30,11 @@ echo "$MESSAGE"
 }
 
 alias drit="docker container run -it"
+alias dritv="docker container run -it -v "$(pwd)":/source"
 alias drita="docker container run -it alpine"
+alias dritva="docker container run -it -v "$(pwd)":/source alpine"
 alias drlint="docker run --rm -i hadolint/hadolint < Dockerfile"
 alias dkillall="docker kill $(docker ps -q)"
-
 
 function drcfnnag {
   if [ "" == "$1" ]; then
@@ -69,4 +72,20 @@ function dimid {
 
 function dritl {
   docker run -it "$(docker images -a | grep $1 | awk '{print $3}')" /bin/sh
+}
+
+function debash {
+  if [ "" == "$1" ]; then
+    echo "Passing a docker container id is required!"
+  else
+    docker exec -it "$1" /usr/bin/env bash
+  fi
+}
+
+function desh {
+  if [ "" == "$1" ]; then
+    echo "Passing a docker container id is required!"
+  else
+    docker exec -it "$1" /bin/sh
+  fi
 }

@@ -189,5 +189,8 @@ export PATH="~/.rbenv/shims:$PATH"
 # the following to ~/.bash_profile:
 eval "$(rbenv init -)"
 
+# Set the limit for open files to 65536 from the default 256
+ulimit -n 65536 200000
+
 #For bash-completion
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion

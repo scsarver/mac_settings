@@ -1,0 +1,31 @@
+termtabname() {
+  printf "\e]1;$1\a"
+}
+
+termnewtab() {
+  local TAB_NAME=$1
+  local COMMAND=$2
+  osascript \
+    -e "tell application \"Terminal\"" \
+    -e "tell application \"System Events\" to keystroke \"t\" using {command down}" \
+    -e "do script \"printf '\\\e]1;$TAB_NAME\\\a'; $COMMAND\" in front window" \
+    -e "end tell" > /dev/null
+}
+
+function termhelp {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+Terminal manipulation aliases and functions.
+
+aliases:
+  N/A
+  
+functions:
+  termtabname - shows the name of the current tab
+  termnewtab - creates a new tab in the terminal
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+
+}

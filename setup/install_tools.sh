@@ -8,6 +8,7 @@
 #
 
 homebrew_packages=(
+  'dict'
   'curl'
   'libressl'
   'gpg'
@@ -21,6 +22,7 @@ homebrew_packages=(
   'shellcheck'
   'git'
   'icdiff'
+  'node'
   'python'
   'python3'
   'pipenv'
@@ -28,6 +30,7 @@ homebrew_packages=(
   'jq'
   'yq'
   'xmlstarlet'
+  'expect'
   'awscli'
   'golang'
   'groovy'
@@ -43,6 +46,7 @@ homebrew_packages=(
   #'terraforming'
   'rbenv'
   'sonar-scanner'
+  'sceptre'
   )
 
 homebrew_casks=(
@@ -58,7 +62,7 @@ homebrew_casks=(
   'wireshark'
   'java'
   'meld'
-  #'spotify'
+  'spotify'
   'docker'
   #'dbeaver-community'
   'authy'
@@ -116,6 +120,10 @@ python3_pips=(
   'ruamel.yaml'
   'pyhcl'
   'BeautifulSoup'
+)
+
+global_npm_modules=(
+  'yarn'
 )
 
 set +e
@@ -265,6 +273,18 @@ do
   echo "Installing Cask: $cask"
   brew cask install "$cask"
 done
+
+
+echo " "
+echo "Installing global npm modules..."
+for global_npm_module in "${global_npm_modules[@]}"
+do
+  echo "Installing npm module: $global_npm_module"
+  npm install --global "$global_npm_module"
+done
+
+
+
 
 #Need to fix owner on directories
 #sudo chown $(whoami) /usr/local/share

@@ -188,9 +188,23 @@ function awss3countobjects {
   fi
 }
 
+function awsdecodeec2message {
+  if [ "" == "$1" ]; then
+    echo "Passing the encoded ec2 auth messageis required!"
+  else
+    aws sts decode-authorization-message --encoded-message "$1" | open -f
+  fi
+}
+
+
+
 function awshelp {
 
 MESSAGE=`cat <<HEREDOC_MESSAGE
+
+References:
+  https://github.com/toniblyx/my-arsenal-of-aws-security-tools
+  
 Aliases:
   awsacctalias - Show account aliases for current credentials
   awsgetcaller - Show current credentials
@@ -216,6 +230,7 @@ Functions:
   awsfindsecret - Finds an AWS Secret matching the supplied string.
   awslistcfn - Lists cloudformation stack names
   awsfindcfn - Finds a cloudformation stack name matched to the supplied string
+  awsdecodeec2message - Calls the aws sts decode-authorization-message api and puts the content into a TextEdit window.
 
 TODO:
   awscmd - function - pass a cli call but wrap with exception handling

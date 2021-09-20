@@ -1,0 +1,23 @@
+function psqlhelp {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+notes:
+  N/A
+
+aliases
+
+functions:
+
+references:
+  - https://www.postgresql.org/docs/12/app-psql.html
+  - https://gist.github.com/Kartones/dd3ff5ec5ea238d4c546
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+}
+
+function psqlexample {
+  echo "psql --dbname=DBNAME --host=HOSTNAME --port=PORT --username=USERNAME --password --command=COMMAND"
+}

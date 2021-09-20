@@ -201,6 +201,10 @@ Is there a git-merge --dry-run option?
      You can also use git diff to compare between local and remote branches
      git diff master origin/master
 
+  Create your repo without using the web interface(required before pushing)
+     curl -u <your_username> \
+       -H "Content-Type: application/json" \
+       -d '{"name":"<repo_name>"}' https://api.github.com/user/repos
 
 
  Links:
@@ -233,6 +237,8 @@ Is there a git-merge --dry-run option?
 TODO
     Does git config pose an issue for tags and releases if the timezonee is not set?
        - https://stackoverflow.com/questions/7651644/git-timezone-and-timestamp-format
+
+
 
 HEREDOC_MESSAGE
 `

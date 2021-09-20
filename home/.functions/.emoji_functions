@@ -1,0 +1,22 @@
+function emjhelp {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+notes:
+  This function file encapsulates common emoji ascii prints and associated utilities.
+
+aliases
+  emjshrug - prints ¯\_(ツ)_/¯
+
+functions:
+  N/A
+
+references:
+  N/A
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+}
+
+alias emjshrug="echo '¯\_(ツ)_/¯'"
