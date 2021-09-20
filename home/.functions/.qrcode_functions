@@ -1,0 +1,37 @@
+function qrcodehelp {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+Qrcode manipulation aliases and functions.
+
+aliases:
+  N/A
+
+functions:
+  qrcoderead - Reads a qrcode image and displays the textual output
+  qrcodecreate - creates a named qrcode image in png format from the supplied text
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+
+}
+
+function qrcoderead {
+  if [ ! -f "$1" ]; then
+    echo "A qrcode file is required to be passed as a parameter [$1]"
+  else
+    zbarimg -q "$1"
+  fi
+}
+
+function qrcodecreate {
+  if [ "" == "$1" ]; then
+    echo "A qrcode output file is required to be passed as a parameter [$1]"
+  else
+    if [ "" == "$2" ]; then
+      echo "Not found, To encode a qrcode the second parameter must be the quoted text to be encoded [$2]"
+    else
+      qrencode -o "$1" "$2"
+    fi
+  fi
+}
