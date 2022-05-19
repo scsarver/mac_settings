@@ -73,6 +73,8 @@ homebrew_casks=(
   'postman'
   'drawio'
   'session-manager-plugin' # AWS SSM session manager
+  'owasp-zap'
+  'simplemind'
 )
 
 homebrew_taps=(

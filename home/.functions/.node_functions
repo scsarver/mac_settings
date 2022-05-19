@@ -1,0 +1,19 @@
+function nodehelp {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+  Aliases:
+    - setnode14 - set in the terminal the path to the node@14 binary
+    - setnode17 - set in the terminal the path to the node@17 binary
+
+  Links:
+    - https://notiz.dev/blog/how-to-manage-multiple-node-versions-on-mac
+
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+}
+
+alias setnode14='export PATH="/usr/local/opt/node@14/bin:$PATH" && node --version'
+alias setnode17='export PATH="/usr/local/opt/node@17/bin:$PATH" && node --version'

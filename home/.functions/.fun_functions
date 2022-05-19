@@ -2,6 +2,10 @@ function funref {
 
 MESSAGE=`cat <<HEREDOC_MESSAGE
 
+  Aliases:
+    - funbenny - opens https://www.youtube.com/watch?v=MK6TXMsvgQg.
+    - funbingo - opens ~/Documents/standup-bingo.png
+
   Links:
     - Hacker typer - https://hackertyper.net/#
 
@@ -16,7 +20,17 @@ MESSAGE=`cat <<HEREDOC_MESSAGE
     - Spyfall - https://spyfall.tannerkrewson.com
     - Jackbox – https://jackbox.tv
 
+  Notes:
+    - Atop adds in youtube videos by adding a period to the url - https://www.komando.com/tv-streaming/secret-trick-to-skip-ads-on-youtube/742056/
+
 HEREDOC_MESSAGE
 `
 echo "$MESSAGE"
 }
+
+function funhelp {
+ funref
+}
+
+alias funbenny='open https://www.youtube.com/watch?v=MK6TXMsvgQg.'
+alias funbingo='open ~/Documents/standup-bingo.png'

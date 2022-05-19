@@ -8,6 +8,7 @@ aliases:
 
 functions:
   qrcoderead - Reads a qrcode image and displays the textual output
+  qrcodeload - Reads a qrcode image and copies it to the clipboard
   qrcodecreate - creates a named qrcode image in png format from the supplied text
 
 HEREDOC_MESSAGE
@@ -20,7 +21,15 @@ function qrcoderead {
   if [ ! -f "$1" ]; then
     echo "A qrcode file is required to be passed as a parameter [$1]"
   else
-    zbarimg -q "$1"
+    zbarimg -q "$1" | sed 's/QR-Code://'
+  fi
+}
+
+function qrcodeload {
+  if [ ! -f "$1" ]; then
+    echo "A qrcode file is required to be passed as a parameter [$1]"
+  else
+    zbarimg -q "$1" | sed 's/QR-Code://' | pbcopy
   fi
 }
 

@@ -9,6 +9,11 @@ alias awscheck="printenv | grep AWS_"
 alias awswhoami="aws iam list-account-aliases | jq -r \".AccountAliases[0]\";aws sts get-caller-identity"
 alias awscfnhelper="bash $UTILITY_SCRIPTS_REPO/cloudformation/cfnhelper.sh"
 
+# Use the  amazon/aws-cli docker container to replace installing the cli:
+# - https://hub.docker.com/r/amazon/aws-cli
+# - https://github.com/aws/aws-cli/blob/v2/docker/Dockerfile
+# alias aws='docker run --rm -ti -v ~/.aws:/root/.aws -v $(pwd):/aws amazon/aws-cli'
+
 function awsextractcreds {
   unset AWS_PROFILE
   unset AWS_SHARED_CREDENTIALS_FILE
@@ -204,7 +209,7 @@ MESSAGE=`cat <<HEREDOC_MESSAGE
 
 References:
   https://github.com/toniblyx/my-arsenal-of-aws-security-tools
-  
+
 Aliases:
   awsacctalias - Show account aliases for current credentials
   awsgetcaller - Show current credentials
@@ -248,6 +253,7 @@ MESSAGE=`cat <<HEREDOC_MESSAGE
    - https://pages.awscloud.com/AWS-Traincert_Ramp-up_Guides.html
 
    JMESPATH - https://jmespath.org/tutorial.html
+   Well Architected labs(need to be logged into an account) - https://wellarchitectedlabs.com
 
 HEREDOC_MESSAGE
 `

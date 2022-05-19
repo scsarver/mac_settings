@@ -1,0 +1,25 @@
+function hrhelp {
+
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+  Links:
+
+  Commands:
+    hrfeedback - Show questions I want to discuss on 1 on 1's with my manager.
+
+
+HEREDOC_MESSAGE
+`
+echo "$MESSAGE"
+}
+
+function hrfeedback {
+
+  echo "Manager Feedback questions:"
+  echo "  "
+  echo "  1.) Am I still providing value?"
+  echo "  2.) Am I focusing on the right things?"
+  echo "  3.) What things could I be doing better?"
+  echo "  4.) Is there any feedback from team members on how I interact with them?"
+  
+}

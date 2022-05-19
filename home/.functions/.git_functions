@@ -210,6 +210,7 @@ Is there a git-merge --dry-run option?
  Links:
    Emojis in github markdown: https://gist.github.com/rxaviers/7360908
    Tips & tricks: https://opensource.com/article/20/10/advanced-git-tips
+   Multiple github accounts & gitconfig: https://www.freecodecamp.org/news/how-to-handle-multiple-git-configurations-in-one-machine/
 
  Aliases:
    alias gs='git status'

@@ -181,6 +181,11 @@ function filehelp {
 
 MESSAGE=`cat <<HEREDOC_MESSAGE
 
+References:
+  - How to make a good Change Log: https://keepachangelog.com/en/1.0.0/
+  - Semantic Versioning: https://semver.org
+  
+
 Diff tools (Not git specific):
   icdiff - side by side terminal diff tool
   Meld - GUI file and directory comparison tool
