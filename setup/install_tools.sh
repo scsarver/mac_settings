@@ -273,7 +273,7 @@ echo "Installing brew casks..."
 for cask in "${homebrew_casks[@]}"
 do
   echo "Installing Cask: $cask"
-  brew cask install "$cask"
+  brew install --cask "$cask"
 done
 
 
