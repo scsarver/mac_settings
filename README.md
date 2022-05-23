@@ -16,6 +16,12 @@ When starting a brand new setup (Written for MacOSX Monterey 12.3.1) it is usefu
   - NOTE: The setup script does attempt to install brew if it is not installed but what is in that script block shows an example of issues encountered on a system with shared users and directory ownership problems. Do teh default install as outlined on the website and then run brew doctor.
 - run the install_tools.sh script.
 
+
+Post install script needs:
+- run docker to accept the terms and conditions then signin with your id
+
+
+
 Remember:
 - Script everything as a record of what was installed.
 - Use Homebrew
