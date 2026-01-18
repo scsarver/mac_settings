@@ -1,5 +1,9 @@
 
 
+function showfunctions {
+  declare -F | grep -v '^declare -f _.*'
+}
+
 function showenvlike {
   printenv | grep $1
 }

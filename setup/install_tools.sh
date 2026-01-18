@@ -8,6 +8,11 @@
 #
 
 homebrew_packages=(
+  'bash'
+  'packer'
+  'terraform'
+  'awscli'
+  'git'
   'dict'
   'curl'
   'libressl'
@@ -20,7 +25,6 @@ homebrew_packages=(
   'qrencode'
   'bash-completion'
   'shellcheck'
-  'git'
   'icdiff'
   'node'
   'python'
@@ -28,10 +32,11 @@ homebrew_packages=(
   'pipenv'
   'pipx'
   'jq'
+  'fx'
   'yq'
   'xmlstarlet'
   'expect'
-  'awscli'
+  'awscli'  
   'golang'
   'groovy'
   'packer'
@@ -42,12 +47,13 @@ homebrew_packages=(
   'postgres'
   'speedtest-cli'
   'googler'
+  'oath-toolkit'
+  'bitwarden-cli'
+  'nmap'
   'rukenshia/repo/saml2aws-auto' # From tap rukenshia/repo
   #'terraforming'
   'rbenv'
-  'sonar-scanner'
-  'sceptre'
-  )
+)
 
 homebrew_casks=(
   'google-chrome'
@@ -66,8 +72,9 @@ homebrew_casks=(
   'docker'
   #'dbeaver-community'
   'authy'
-  #'sfdx' # Salesforce DX cli
-	'bitwarden'
+  'meld'
+  'sfdx'
+  'bitwarden'
   'powershell'
   'rocket-chat'
   'postman'
@@ -75,6 +82,7 @@ homebrew_casks=(
   'session-manager-plugin' # AWS SSM session manager
   'owasp-zap'
   'simplemind'
+  'keybase'
 )
 
 homebrew_taps=(
@@ -132,7 +140,7 @@ set +e
 clear
 echo " "
 echo "Checking for software installations and installing if they are not found."
-echo " "
+echo "Checking for the xcode version $(/usr/bin/xcodebuild -version)"
 
 echo "Checking for the xcode path and version ( if not found:  xcode-select --install )"
 echo "  xcode-select -p (path): $(xcode-select -p)"
@@ -231,6 +239,8 @@ if [[ "${installed_homebrew## }" == "command not found" ]]; then
   echo " "
 else
   echo "Homebrew is installed!"
+  echo "TODO: Should we update homebrew here?"
+  echo "     brew update"
 fi
 
 echo "Always run the brew update:"
@@ -338,6 +348,8 @@ done
 # #Output should match: "The Session Manager plugin is installed successfully. Use the AWS CLI to start a session."
 # session-manager-plugin
 
+
+echo "Add sentinel simulator install instructions here!!!"
 
 echo " "
 

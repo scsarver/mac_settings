@@ -135,6 +135,14 @@ alias cdproto="cd $REPOS_BASE_DIR/prototype"
 alias psg="ps aux | grep -v grep | grep -i -e VSZ -e" #Find a processes info by name
 alias histg="history | grep" #grep the history
 
+function up {
+  local depth=$1;
+  for i in $(seq 1 ${depth:-"1"})
+  do
+    cd ../
+  done
+}
+
 function cdiac {
     local CURRENT_START_PATH="$(pwd)"
     local CURRENT_PATH="${CURRENT_START_PATH##*[/]}"
@@ -212,4 +220,45 @@ HEREDOC_MESSAGE
 `
 echo "$MESSAGE"
 
+function showhints {
+  echo 'MacOSX - '
+  echo '     Show/Hide Hidden Files                - [ CMD + SHIFT + . ] '
+  echo '     Open a Go to Folder window            - [ CMD + SHIFT + G ] '
+  echo '     Open the Connect to Server window     - [ CMD + K ] '
+
+  echo '     Open the folder that contains the current folder.- [ CMD + CTRL + UP ARROM ] '
+  echo '     Open the folder that contains the current folder in a new window.- [ CMD + CTRL + . ] '
+
+
+  echo '      - https://ianlunn.co.uk/articles/quickly-showhide-hidden-files-mac-os-x-mavericks/'
+  echo '      - https://support.apple.com/en-us/HT201236'
+}
+
+
+function notifyme {
+  #MACOSX - osascript - https://stackoverflow.com/questions/5588064/how-do-i-make-a-mac-terminal-pop-up-alert-applescript
+  # osascript -e "tell app \"Finder\" to display dialog \"$1\""
+  osascript -e "display notification \"$1\" with title \"Notification -$(date +%Y.%m.%d-%H:%M:%S) \""
+}
+
+function findbetween {
+  # find . -type d -newermt "2019-01-01" \! -newermt "2019-02-01" -exec ls -ld {} \;
+  find . -type d -newermt "$1" \! -newermt "$2" -exec ls -ld {} \;
+}
+
+function showbig {
+ echo "implement me!"
+}
+
+# List open processes ordered by it's number of open files
+function psbyfc {
+  ps -ef |awk '{ print $2 }'  |tail -n +2  |while read pid; do echo "$pid$(lsof -p $pid |wc -l)"; done  |sort -r -n -k 2  |while read pid count; do echo "$pid$count$(ps -o command= -p $pid)"; done
+}
+
+
+function resetxcodepath {
+  # Re-occouring problem with a brew installation that causes xcode path to need to be reset.
+  # https://stackoverflow.com/questions/21488778/library-not-loaded-usr-local-opt-readline-lib-libreadline-6-2-dylib
+  #https://github.com/Homebrew/legacy-homebrew/issues/42223
+  sudo xcode-select -s /Library/Developer/CommandLineTools
 }

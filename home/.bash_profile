@@ -100,6 +100,19 @@ function getoathtkn {
   fi
 }
 
+# ==> readline
+# readline is keg-only, which means it was not symlinked into /usr/local,
+# because macOS provides the BSD libedit library, which shadows libreadline.
+# In order to prevent conflicts when programs look for libreadline we are
+# defaulting this GNU Readline installation to keg-only.
+#
+# For compilers to find readline you may need to set:
+export LDFLAGS="-L/usr/local/opt/readline/lib"
+export CPPFLAGS="-I/usr/local/opt/readline/include"
+# For pkg-config to find readline you may need to set:
+export PKG_CONFIG_PATH="/usr/local/opt/readline/lib/pkgconfig"
+
+
 #https://www.cyberciti.biz/tips/howto-linux-unix-bash-shell-setup-prompt.html
 # PS1="\033[2m\D{%Y.%m.%d-%H:%M:%S}\033[0m\033[1m|\033[0m\w\033[1m:\033[0m"
 # https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux/20983251#20983251
