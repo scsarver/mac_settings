@@ -219,6 +219,7 @@ functions:
 HEREDOC_MESSAGE
 `
 echo "$MESSAGE"
+}
 
 function showhints {
   echo 'MacOSX - '
@@ -254,7 +255,6 @@ function showbig {
 function psbyfc {
   ps -ef |awk '{ print $2 }'  |tail -n +2  |while read pid; do echo "$pid$(lsof -p $pid |wc -l)"; done  |sort -r -n -k 2  |while read pid count; do echo "$pid$count$(ps -o command= -p $pid)"; done
 }
-
 
 function resetxcodepath {
   # Re-occouring problem with a brew installation that causes xcode path to need to be reset.
