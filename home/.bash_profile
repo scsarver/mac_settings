@@ -163,6 +163,8 @@ Functions:
   itdo
   cpgitdir
   getoathtkn
+  netmode      - switch the USB-C ethernet adapter between C7 / HinksPix / router LAN
+  nethelp      - help for netmode and the other network functions
 
 Loaded Function Files:
 HEREDOC_MESSAGE
@@ -183,6 +185,9 @@ HEREDOC_MESSAGE
 # NOTE: Added this oddball location for fly/concourse: /Users/sarvers/Documents/repos/scsarver/utility_scripts/concourse/fly
 export PATH="/Users/sarvers/Documents/repos/scsarver/utility_scripts/concourse:/usr/local/opt/libressl/bin:/usr/local/opt/curl/bin:/usr/local/sbin:$PATH"
 
+
+# Added to teh PATH for MacPorts
+export PATH="/opt/local/bin:$PATH"
 
 # this alias is for self-generated ssh keys that have been imported into AWS.
 # alias awsimportedkeyfp='for file in `ls ~/.ssh/*id_rsa$*`; do echo -n $file " - " ; openssl pkey -in $file -pubout -outform DER | openssl md5 -c; done'

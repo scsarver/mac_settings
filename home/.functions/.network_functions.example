@@ -1,0 +1,19 @@
+# Template for ~/.netmode.local — copy, fill in, and keep OUT of git.
+#
+#   cp home/.functions/.network_functions.example ~/.netmode.local
+#   chmod 600 ~/.netmode.local
+#
+# These override the generic defaults in .network_functions. Real addresses belong
+# here, never in the committed file — this repo is public.
+
+NETMODE_USB_DEV="en7"                  # your USB ethernet interface
+
+NETMODE_ROUTER_TARGET="192.168.1.1"    # main router
+NETMODE_SWITCH_TARGET="192.168.0.1"    # managed switch
+
+NETMODE_C7_TARGET="192.168.0.1"        # secondary router / AP
+NETMODE_C7_MASK="255.255.255.0"
+
+NETMODE_HINKS_IP="192.168.0.219"       # this Mac, when directly cabled to a device
+NETMODE_HINKS_MASK="255.255.255.0"
+NETMODE_HINKS_TARGET="192.168.0.217"   # that device

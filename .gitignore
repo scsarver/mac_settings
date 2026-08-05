@@ -1,3 +1,8 @@
 home/.functions/.onelogin_access_functions
 home/.functions/.vci_functions
 .DS_Store
+
+# Site-specific network addresses for netmode. THIS REPO IS PUBLIC — real
+# addresses live in ~/.netmode.local, never here. Template: .network_functions.example
+.netmode.local
+home/.functions/.netmode.local

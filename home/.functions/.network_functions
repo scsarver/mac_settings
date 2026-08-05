@@ -8,3 +8,270 @@ function scanports {
 function nwgetmac {
   ifconfig en0 | grep ether | cut -d' ' -f 2
 }
+
+# =============================================================================
+# netmode - switch what the USB-C ethernet adapter is plugged into
+#
+# WHY THIS EXISTS:
+#   A USB ethernet adapter gets connected to different things - a secondary
+#   router, a directly-cabled device, or a LAN port on the main router. Each
+#   needs a different IP config, and macOS allows only one network *service* per
+#   hardware device to be active at a time. Switching means enabling one profile
+#   and disabling the other - otherwise a manual System Settings chore.
+#
+#   Separately: any USB ethernet profile carrying a gateway will STEAL the
+#   default route from Wi-Fi, because USB ethernet outranks Wi-Fi in the macOS
+#   service order. The symptom is "the wireless stopped working" while Wi-Fi is
+#   in fact still associated. 'netmode harden' fixes that permanently.
+# =============================================================================
+
+# --- site configuration ------------------------------------------------------
+# THIS REPO IS PUBLIC. Site-specific addresses live in a local, gitignored file so
+# that publishing this tooling does not publish a map of the home network.
+#
+#   ~/.netmode.local          <- your addresses (never committed)
+#   .network_functions.example <- template to copy from
+#
+# Defaults below are generic placeholders. Without the local file the mode
+# functions still run, they just target vendor factory addresses.
+
+NETMODE_WIFI_SVC="Wi-Fi"
+NETMODE_USB_SVC="USB 10/100/1000 LAN"        # flexible profile
+NETMODE_HINKS_SVC="USB 10/100/1000 LAN 2"    # dedicated device profile
+NETMODE_USB_DEV="en7"
+
+NETMODE_ROUTER_TARGET="192.168.1.1"          # your router
+NETMODE_C7_TARGET="192.168.0.1"              # secondary router / AP
+NETMODE_C7_MASK="255.255.255.0"
+NETMODE_HINKS_IP="192.168.0.219"             # static addr for direct-connect
+NETMODE_HINKS_MASK="255.255.255.0"
+NETMODE_HINKS_TARGET="192.168.0.217"         # the directly-connected device
+NETMODE_SWITCH_TARGET="192.168.0.1"          # managed switch factory default
+
+# Site overrides. Keep real addresses here, never in the committed file.
+[ -f "$HOME/.netmode.local" ] && . "$HOME/.netmode.local"
+
+# Wi-Fi ahead of both USB profiles. The serial adapters carry no IP config so
+# their position is irrelevant, but -ordernetworkservices wants the full list.
+NETMODE_ORDER=("LPSS Serial Adapter (1)" "LPSS Serial Adapter (2)" \
+               "$NETMODE_WIFI_SVC" "$NETMODE_USB_SVC" "$NETMODE_HINKS_SVC" \
+               "Thunderbolt Bridge" "IPVanish VPN WireGuard Configuration")
+
+function _netmode_sudo {
+  if ! sudo -n true 2>/dev/null; then
+    echo "  (admin rights needed - you'll be prompted for your password)"
+    sudo -v || return 1
+  fi
+  return 0
+}
+
+function _netmode_check_adapter {
+  if ! ifconfig -l | tr ' ' '\n' | grep -qx "$NETMODE_USB_DEV"; then
+    echo "  WARNING: $NETMODE_USB_DEV is not present - adapter unplugged or not enumerating."
+    echo "           The profile change is still saved and applies once it appears."
+  fi
+}
+
+function _netmode_show {
+  echo
+  echo "  --- resulting state ---"
+  printf "  default route : %s\n" "$(route -n get default 2>/dev/null | awk '/gateway:|interface:/{printf "%s ", $2}')"
+  printf "  Wi-Fi         : %s\n" "$(networksetup -getairportnetwork en0 2>/dev/null | sed 's/^Current Wi-Fi Network: //')"
+  printf "  %-13s : %s\n" "$NETMODE_USB_DEV" "$(ifconfig $NETMODE_USB_DEV 2>/dev/null | awk '/inet /{print $2}' || echo 'no address')"
+  echo
+}
+
+# Show what's active right now. Read-only, no sudo.
+function netmode_status {
+  echo
+  echo "  === netmode status ==="
+  echo
+  echo "  Services (* = disabled):"
+  networksetup -listallnetworkservices 2>/dev/null | tail -n +2 | sed 's/^/    /'
+  echo
+  echo "  Order:"
+  networksetup -listnetworkserviceorder 2>/dev/null | grep -E '^\([0-9*]' | sed 's/^/    /'
+  echo
+  echo "  Adapter $NETMODE_USB_DEV: $(ifconfig -l | tr ' ' '\n' | grep -qx "$NETMODE_USB_DEV" && echo PRESENT || echo ABSENT)"
+  echo
+  echo "  $NETMODE_USB_SVC:"
+  networksetup -getinfo "$NETMODE_USB_SVC" 2>/dev/null | grep -E 'Configuration|IP address|Router' | sed 's/^/    /'
+  echo
+  echo "  $NETMODE_HINKS_SVC:"
+  networksetup -getinfo "$NETMODE_HINKS_SVC" 2>/dev/null | grep -E 'Configuration|IP address|Router|disabled' | sed 's/^/    /'
+  _netmode_show
+}
+
+# One-time hardening. Idempotent - safe to re-run any time (e.g. after a macOS
+# update resets the order).
+#
+# SERVICE ORDER IS THE ENTIRE FIX. macOS picks its primary interface by service
+# order, so with Wi-Fi ranked above the USB profiles, a USB profile can carry a
+# gateway and still not take the default route.
+#
+# VERIFIED: with a secondary router plugged in and handing out a DHCP lease that
+# included a gateway, the default route stayed on Wi-Fi via en0 and internet was
+# unaffected. Service order alone was sufficient.
+#
+# This deliberately does NOT rewrite the IP configuration of either profile.
+# An earlier version stripped the gateway from the direct-connect profile - that was
+# wrong. That profile's router setting is intentional (direct connection to the
+# controller) and must be left alone.
+function netmode_harden {
+  _netmode_sudo || return 1
+  echo "  Putting Wi-Fi ahead of the USB ethernet profiles..."
+  sudo networksetup -ordernetworkservices "${NETMODE_ORDER[@]}"
+  echo "  Done. Wi-Fi keeps the default route regardless of what's plugged in."
+  echo "  (IP configuration of both USB profiles left untouched, by design.)"
+  _netmode_show
+}
+
+# Wi-Fi only - both USB profiles off.
+function netmode_wifi {
+  _netmode_sudo || return 1
+  echo "  Disabling both USB ethernet profiles..."
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" off
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  echo "  Wi-Fi only."
+  _netmode_show
+}
+
+# en7 -> secondary router via DHCP. It serves DHCP on <alt-subnet>. Its lease
+# carries a gateway, but 'netmode harden' has already put Wi-Fi ahead of USB
+# ethernet in the service order, so the default route stays on Wi-Fi. Verified.
+function netmode_c7 {
+  _netmode_sudo || return 1
+  _netmode_check_adapter
+  echo "  Switching $NETMODE_USB_DEV to DHCP for the secondary router segment..."
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" on
+  sudo networksetup -setdhcp "$NETMODE_USB_SVC"
+  echo "  Secondary router answers at $NETMODE_C7_TARGET (web UI + ssh)."
+  _netmode_show
+}
+
+# en7 -> directly-cabled device, connected DIRECTLY (no router in between).
+# Only flips which service is enabled - never rewrites the profile. The profile's
+# static IP and router setting are deliberate; leave them as the user set them.
+function netmode_hinks {
+  _netmode_sudo || return 1
+  _netmode_check_adapter
+  echo "  Switching $NETMODE_USB_DEV to the direct-connect profile..."
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" off
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" on
+  echo "  Controller expected at $NETMODE_HINKS_TARGET"
+  _netmode_show
+}
+
+# en7 -> a LAN port on the main router, via DHCP. Use this when you need a WIRED
+# connection to the router - firmware flashing must NOT be done over Wi-Fi.
+function netmode_lan {
+  _netmode_sudo || return 1
+  _netmode_check_adapter
+  echo "  Switching $NETMODE_USB_DEV to DHCP for the router LAN..."
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" on
+  sudo networksetup -setdhcp "$NETMODE_USB_SVC"
+  echo "  Wired to the router. Safe to flash firmware from here."
+  _netmode_show
+}
+
+# en7 -> 192.168.0.100, to reach the managed switch switch on its factory default IP.
+# The switch is a DHCP *client* and does not serve DHCP, so a Mac plugged straight
+# into it self-assigns a useless 169.254.x address. Static is required.
+# Switch defaults: 192.168.0.1, admin/admin.
+function netmode_switch {
+  _netmode_sudo || return 1
+  _netmode_check_adapter
+  echo "  Setting $NETMODE_USB_DEV to reach the switch at $NETMODE_SWITCH_TARGET..."
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" on
+  sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.0.100 255.255.255.0 "" 2>/dev/null \
+    || sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.0.100 255.255.255.0 192.168.0.100
+  sudo networksetup -setdnsservers "$NETMODE_USB_SVC" Empty
+  echo "  Browse to http://$NETMODE_SWITCH_TARGET  (default admin/admin - change it)"
+  echo "  Once the switch has a static IP on the main LAN, use 'netmode lan' instead."
+  _netmode_show
+}
+
+# en7 -> 192.168.0.66, the address the secondary router bootloader expects a TFTP server
+# on during recovery. Only needed to un-brick or revert the C7 to stock.
+# See your network docs
+function netmode_tftp {
+  _netmode_sudo || return 1
+  _netmode_check_adapter
+  echo "  Setting $NETMODE_USB_DEV to the C7 TFTP recovery address (192.168.0.66)..."
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" on
+  sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.0.66 255.255.255.0 "" 2>/dev/null \
+    || sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.0.66 255.255.255.0 192.168.0.66
+  echo "  Serve '<vendor>_tp_recovery.bin' from /private/tftpboot, then hold WPS/Reset at power-on."
+  _netmode_show
+}
+
+# en7 -> 192.168.1.100, to reach a freshly flashed OpenWrt box on its 192.168.1.1 default.
+function netmode_owrt {
+  _netmode_sudo || return 1
+  _netmode_check_adapter
+  echo "  Setting $NETMODE_USB_DEV to reach fresh OpenWrt at 192.168.1.1..."
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" on
+  sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.1.100 255.255.255.0 "" 2>/dev/null \
+    || sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.1.100 255.255.255.0 192.168.1.100
+  echo "  Then: ssh root@192.168.1.1  (no password on first login - set one immediately)"
+  _netmode_show
+}
+
+function netmode {
+  case "$1" in
+    status|"")      netmode_status ;;
+    harden)         netmode_harden ;;
+    wifi)           netmode_wifi ;;
+    c7)             netmode_c7 ;;
+    hinks|hinkspix) netmode_hinks ;;
+    lan|router)     netmode_lan ;;
+    switch|sw)      netmode_switch ;;
+    tftp|recovery)  netmode_tftp ;;
+    owrt|openwrt)   netmode_owrt ;;
+    help|-h|--help) nethelp ;;
+    *) echo "  Unknown mode: $1"; nethelp; return 1 ;;
+  esac
+}
+
+function nethelp {
+MESSAGE=`cat <<HEREDOC_MESSAGE
+
+  netmode - switch what the USB-C ethernet adapter (en7) is plugged into
+
+    netmode status    Show profiles, service order and default route (read-only)
+    netmode harden    One-time fix: stop USB ethernet stealing the default route
+                      from Wi-Fi. Idempotent - re-run after macOS updates.
+    netmode wifi      Wi-Fi only, both USB profiles disabled
+    netmode c7        en7 -> secondary router segment via DHCP (C7 is at $NETMODE_C7_TARGET)
+    netmode hinks     en7 -> static $NETMODE_HINKS_IP (controller at $NETMODE_HINKS_TARGET)
+    netmode lan       en7 -> main router LAN via DHCP (use this to flash firmware)
+    netmode switch    en7 -> 192.168.0.100 reach managed switch at its default 192.168.0.1
+    netmode tftp      en7 -> 192.168.0.66  C7 TFTP recovery / un-brick
+    netmode owrt      en7 -> 192.168.1.100 reach freshly flashed OpenWrt (192.168.1.1)
+    netmode help      This message
+
+  WHY: by default USB ethernet outranks Wi-Fi in the macOS service order, so a
+  USB profile carrying a gateway steals the default route. That looks exactly
+  like "the wireless stopped working" even though Wi-Fi is still associated.
+  'netmode harden' fixes it by ranking Wi-Fi first - service order is the whole
+  fix. It does NOT modify either profile's IP configuration.
+
+  CAUTION: <alt-subnet> is the direct-connect link. <main-subnet> is the main LAN.
+           71 vs 17 - easy to transpose.
+
+  Other functions in this file:
+    scanports <host>  Scan all 65535 TCP ports on a host
+    nwgetmac          MAC address of en0
+
+  Network topology, device inventory and config backups:
+    ~/Documents/repos/scsarver/network-topology
+
+HEREDOC_MESSAGE
+`
+  echo "$MESSAGE"
+}
