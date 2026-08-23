@@ -26,28 +26,70 @@
 #   load. Doing it by hand is three steps (create/reuse the worktree, cd into
 #   it, launch claude) easy to skip out of habit. ntwork makes it one.
 #
+# EXTENDED 2026-08-23: two gaps closed after a week of using this.
+#   1. Finishing/syncing/listing/dropping still meant switching to
+#      `./scripts/worktree.sh <verb>` by hand - one tool to start work, a
+#      different one for the rest of its life. ntwork now forwards
+#      list/sync/finish/drop/path/next-number straight to worktree.sh, so
+#      it's the only name to remember for the whole lifecycle. It still does
+#      none of the actual git work itself - worktree.sh remains the engine,
+#      ntwork is just the single front door onto it.
+#   2. Starting brand-new work meant digging up the next unused issue number
+#      by hand first. Pass ntwork more than one space-free token (a
+#      description, not a bare number/name) and it asks worktree.sh for
+#      `next-number` - a read-only, advisory number only; nothing is
+#      reserved until the issue is actually written up, same as always -
+#      then launches claude with that description as the first message
+#      instead of an empty session.
+#
 # WHAT THIS DELIBERATELY DOES NOT DO:
 #   - Does not know anything about network-topology specifically. It works
 #     against whatever repo you're standing in, as long as it has an
-#     executable ./scripts/worktree.sh with start/path subcommands. No
+#     executable ./scripts/worktree.sh with start/path subcommands, and
+#     list/sync/finish/drop/next-number if you want those forwarded too. No
 #     site-specific values here - safe for this repo being public.
 #   - Does not launch claude for you if it can't resolve a worktree path -
 #     fails loudly instead of guessing.
-#   - Does not do anything to finish/merge the work. That's still
-#     ./scripts/worktree.sh finish <name>, run from wherever - a fix shipped
-#     alongside this makes worktree.sh resolve the true repo root correctly
-#     regardless of whether you run it from the main checkout or a worktree.
+#   - Does not decide what a "free-text description" means beyond word
+#     count - a single space-free token is always treated as an explicit
+#     issue number/name, exactly as before this extension.
 # =============================================================================
 
 function ntwork {
-  local target="$1"
-  if [ -z "$target" ]; then
-    echo "usage: ntwork <issue-number-or-name>   (run from inside a repo with ./scripts/worktree.sh)" >&2
+  if [ $# -eq 0 ]; then
+    echo "usage: ntwork <issue-number-or-name>        launch claude in that worktree" >&2
+    echo "       ntwork <a free-text description>     auto-number new work, launch claude with it as the first message" >&2
+    echo "       ntwork list|sync|finish|drop|path|next-number [name]   forwarded to ./scripts/worktree.sh" >&2
+    echo "  (run from inside a repo with an executable ./scripts/worktree.sh)" >&2
     return 2
   fi
   if [ ! -x ./scripts/worktree.sh ]; then
     echo "no executable ./scripts/worktree.sh in $(pwd) - ntwork only works in a repo that has one" >&2
     return 1
+  fi
+
+  # Verbs past 'start' are just forwarded - worktree.sh already owns the real logic, ntwork is
+  # only the single name a human needs to remember. None of these launch claude.
+  case "$1" in
+    list|sync|finish|drop|path|next-number)
+      ./scripts/worktree.sh "$@"
+      return $?
+      ;;
+  esac
+
+  local target query
+  if [ $# -eq 1 ] && [[ "$1" != *' '* ]]; then
+    # a single space-free token: today's explicit issue-number-or-name path
+    target="$1"
+  else
+    # more than one word: a free-text description of NEW work, not an existing target
+    query="$*"
+    target="$(./scripts/worktree.sh next-number 2>/dev/null)"
+    if [ -z "$target" ]; then
+      echo "this repo's worktree.sh has no 'next-number' subcommand - pass an explicit issue number/name instead" >&2
+      return 1
+    fi
+    echo "-> auto-numbered issue-$target (advisory only - not written anywhere until you commit it)"
   fi
 
   # Create it if new; harmless (and expected) if it already exists - either way we just want
@@ -62,5 +104,9 @@ function ntwork {
   fi
 
   echo "-> $dest"
-  ( cd "$dest" && claude )
+  if [ -n "$query" ]; then
+    ( cd "$dest" && claude "$query" )
+  else
+    ( cd "$dest" && claude )
+  fi
 }
