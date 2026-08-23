@@ -42,6 +42,18 @@
 #      then launches claude with that description as the first message
 #      instead of an empty session.
 #
+# EXTENDED 2026-08-23 (again): two more fixes from a week of actually using this.
+#   1. REAL BUG: `ntwork 67 fix the login bug` did NOT resume issue 67 - the explicit-target
+#      path only fired for EXACTLY one space-free word, so any multi-word call (even one led by
+#      a bare issue number) fell into the free-text auto-number branch, discarding the "67" and
+#      creating a brand-new, unrelated issue instead. This is confirmed to be how a real issue-79
+#      came to exist when issue-67 was what was meant. Fixed: a bare leading number now always
+#      wins as the target, with the rest of the words as claude's first message.
+#   2. Forwards `next-round` too, alongside next-number - see worktree.sh's own header for the
+#      naming pattern this pairs with (issue-N first, issue-N-2/-3/... for later, SEPARATE
+#      worktrees on that same issue N - decided so the branch name alone says what it relates to,
+#      no need to go read git log to disambiguate a reused name).
+#
 # WHAT THIS DELIBERATELY DOES NOT DO:
 #   - Does not know anything about network-topology specifically. It works
 #     against whatever repo you're standing in, as long as it has an
@@ -56,11 +68,31 @@
 # =============================================================================
 
 function ntwork {
+  case "${1:-}" in
+    -h|--help|--usage)
+      echo "usage: ntwork <issue-number-or-name>              launch claude in that worktree"
+      echo "       ntwork <issue-number> <first message...>  open/resume THAT issue's worktree,"
+      echo "                                                  claude's first message is the rest"
+      echo "       ntwork <a free-text description, no leading number>   auto-number NEW work,"
+      echo "                                                  claude's first message is all of it"
+      echo "       ntwork list|sync|finish|drop|path|next-number|next-round [name]   forwarded to ./scripts/worktree.sh"
+      echo "       ntwork -h|--help|--usage              show this"
+      echo "  (run from inside a repo with an executable ./scripts/worktree.sh)"
+      # Pulled live from the target repo's own script, not copied here, so this can't drift out
+      # of sync with what worktree.sh actually does - see the file header for why that matters.
+      if [ -x ./scripts/worktree.sh ]; then
+        echo
+        ./scripts/worktree.sh --help
+      fi
+      return 0
+      ;;
+  esac
   if [ $# -eq 0 ]; then
-    echo "usage: ntwork <issue-number-or-name>        launch claude in that worktree" >&2
-    echo "       ntwork <a free-text description>     auto-number new work, launch claude with it as the first message" >&2
-    echo "       ntwork list|sync|finish|drop|path|next-number [name]   forwarded to ./scripts/worktree.sh" >&2
-    echo "  (run from inside a repo with an executable ./scripts/worktree.sh)" >&2
+    echo "usage: ntwork <issue-number-or-name>              launch claude in that worktree" >&2
+    echo "       ntwork <issue-number> <first message...>  open/resume THAT issue, rest is the first message" >&2
+    echo "       ntwork <a free-text description, no leading number>   auto-number NEW work" >&2
+    echo "       ntwork list|sync|finish|drop|path|next-number|next-round [name]   forwarded to ./scripts/worktree.sh" >&2
+    echo "       ntwork -h|--help|--usage              show this, with worktree.sh's own reference" >&2
     return 2
   fi
   if [ ! -x ./scripts/worktree.sh ]; then
@@ -71,7 +103,7 @@ function ntwork {
   # Verbs past 'start' are just forwarded - worktree.sh already owns the real logic, ntwork is
   # only the single name a human needs to remember. None of these launch claude.
   case "$1" in
-    list|sync|finish|drop|path|next-number)
+    list|sync|finish|drop|path|next-number|next-round)
       ./scripts/worktree.sh "$@"
       return $?
       ;;
@@ -81,8 +113,17 @@ function ntwork {
   if [ $# -eq 1 ] && [[ "$1" != *' '* ]]; then
     # a single space-free token: today's explicit issue-number-or-name path
     target="$1"
+  elif [[ "$1" == [0-9]* ]] && [[ "$1" != *' '* ]]; then
+    # a bare issue number FOLLOWED by more words - "ntwork 67 fix the login bug" means work ON
+    # issue 67 with that as the first message, not a free-text description of new work. Fixed
+    # 2026-08-23: this used to fall into the free-text branch below and auto-number a BRAND NEW
+    # issue instead, because "more than one word" was checked before "does the first word name
+    # an issue". Cost a real collision - typing this to resume issue 67 instead created issue 79.
+    target="$1"
+    shift
+    query="$*"
   else
-    # more than one word: a free-text description of NEW work, not an existing target
+    # more than one word, not led by a bare number: a free-text description of NEW work
     query="$*"
     target="$(./scripts/worktree.sh next-number 2>/dev/null)"
     if [ -z "$target" ]; then
