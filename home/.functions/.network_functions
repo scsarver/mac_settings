@@ -14,10 +14,11 @@ function nwgetmac {
 #
 # WHY THIS EXISTS:
 #   A USB ethernet adapter gets connected to different things - a secondary
-#   router, a directly-cabled device, or a LAN port on the main router. Each
-#   needs a different IP config, and macOS allows only one network *service* per
-#   hardware device to be active at a time. Switching means enabling one profile
-#   and disabling the other - otherwise a manual System Settings chore.
+#   router, one of several directly-cabled devices, or a LAN port on the main
+#   router. Each needs a different IP config, and macOS allows only one network
+#   *service* per hardware device to be active at a time. Switching means
+#   enabling one profile and disabling the rest - otherwise a System Settings
+#   chore, or worse, retyping one shared profile per use.
 #
 #   Separately: any USB ethernet profile carrying a gateway will STEAL the
 #   default route from Wi-Fi, because USB ethernet outranks Wi-Fi in the macOS
@@ -36,25 +37,43 @@ function nwgetmac {
 # functions still run, they just target vendor factory addresses.
 
 NETMODE_WIFI_SVC="Wi-Fi"
-NETMODE_USB_SVC="USB 10/100/1000 LAN"        # flexible profile
-NETMODE_HINKS_SVC="USB 10/100/1000 LAN 2"    # dedicated device profile
+NETMODE_USB_SVC="USB 10/100/1000 LAN"        # flexible profile - rewritten per mode
 NETMODE_USB_DEV="en7"
+
+# ONE PROFILE PER TARGET. These are never rewritten by a mode function - each is
+# configured once, by hand, and from then on the mode functions only flip which
+# one is enabled.
+#
+# WHY: there used to be a SINGLE spare profile that got retyped by hand whenever
+# a different device needed a cable. That does not work, and the reason is worth
+# keeping: one slot serving two targets is wrong for one of them at all times,
+# and its saved values tell you nothing about which target it was last aimed at.
+# A profile per target costs one extra entry in System Settings and removes the
+# whole class of problem.
+NETMODE_DEV_A_SVC="Direct connect 1"         # dedicated profile: device A
+NETMODE_DEV_B_SVC="Direct connect 2"         # dedicated profile: device B
 
 NETMODE_ROUTER_TARGET="192.168.1.1"          # your router
 NETMODE_C7_TARGET="192.168.0.1"              # secondary router / AP
 NETMODE_C7_MASK="255.255.255.0"
-NETMODE_HINKS_IP="192.168.0.219"             # static addr for direct-connect
-NETMODE_HINKS_MASK="255.255.255.0"
-NETMODE_HINKS_TARGET="192.168.0.217"         # the directly-connected device
+NETMODE_DEV_A_IP="192.168.0.219"             # this Mac's addr on the A link
+NETMODE_DEV_A_TARGET="192.168.0.215"         # device A, directly cabled
+NETMODE_DEV_B_IP="192.168.0.220"             # this Mac's addr on the B link
+NETMODE_DEV_B_TARGET="192.168.0.217"         # device B, directly cabled
 NETMODE_SWITCH_TARGET="192.168.0.1"          # managed switch factory default
 
 # Site overrides. Keep real addresses here, never in the committed file.
 [ -f "$HOME/.netmode.local" ] && . "$HOME/.netmode.local"
 
-# Wi-Fi ahead of both USB profiles. The serial adapters carry no IP config so
+# Every dedicated profile. Any mode that takes over the adapter turns ALL of
+# these off first, so adding a target here is the only edit a new one needs.
+NETMODE_DEDICATED_SVCS=("$NETMODE_DEV_A_SVC" "$NETMODE_DEV_B_SVC")
+
+# Wi-Fi ahead of every USB profile. The serial adapters carry no IP config so
 # their position is irrelevant, but -ordernetworkservices wants the full list.
 NETMODE_ORDER=("LPSS Serial Adapter (1)" "LPSS Serial Adapter (2)" \
-               "$NETMODE_WIFI_SVC" "$NETMODE_USB_SVC" "$NETMODE_HINKS_SVC" \
+               "$NETMODE_WIFI_SVC" "$NETMODE_USB_SVC" \
+               "${NETMODE_DEDICATED_SVCS[@]}" \
                "Thunderbolt Bridge" "IPVanish VPN WireGuard Configuration")
 
 function _netmode_sudo {
@@ -70,6 +89,16 @@ function _netmode_check_adapter {
     echo "  WARNING: $NETMODE_USB_DEV is not present - adapter unplugged or not enumerating."
     echo "           The profile change is still saved and applies once it appears."
   fi
+}
+
+# Turn every dedicated profile off. Called by every mode that claims the adapter,
+# because macOS activates only one service per device and a stale one left
+# enabled is how you end up on the wrong link without noticing.
+function _netmode_dedicated_off {
+  local svc
+  for svc in "${NETMODE_DEDICATED_SVCS[@]}"; do
+    sudo networksetup -setnetworkserviceenabled "$svc" off 2>/dev/null
+  done
 }
 
 function _netmode_show {
@@ -97,8 +126,12 @@ function netmode_status {
   echo "  $NETMODE_USB_SVC:"
   networksetup -getinfo "$NETMODE_USB_SVC" 2>/dev/null | grep -E 'Configuration|IP address|Router' | sed 's/^/    /'
   echo
-  echo "  $NETMODE_HINKS_SVC:"
-  networksetup -getinfo "$NETMODE_HINKS_SVC" 2>/dev/null | grep -E 'Configuration|IP address|Router|disabled' | sed 's/^/    /'
+  local svc
+  for svc in "${NETMODE_DEDICATED_SVCS[@]}"; do
+    echo "  $svc:"
+    networksetup -getinfo "$svc" 2>/dev/null | grep -E 'Configuration|IP address|Router|disabled' | sed 's/^/    /'
+    echo
+  done
   _netmode_show
 }
 
@@ -113,10 +146,12 @@ function netmode_status {
 # included a gateway, the default route stayed on Wi-Fi via en0 and internet was
 # unaffected. Service order alone was sufficient.
 #
-# This deliberately does NOT rewrite the IP configuration of either profile.
-# An earlier version stripped the gateway from the direct-connect profile - that was
-# wrong. That profile's router setting is intentional (direct connection to the
-# controller) and must be left alone.
+# This deliberately does NOT rewrite the IP configuration of any profile. An
+# earlier version stripped the gateway out of a direct-connect profile to fix an
+# unrelated symptom - wrong, and it destroyed a setting it did not understand.
+# The dedicated profiles are now DESIGNED with no gateway (their targets are
+# on-link, so nothing needs routing), which is a different thing entirely: it
+# removes the route-stealing hazard at the source instead of relying on order.
 function netmode_harden {
   _netmode_sudo || return 1
   echo "  Putting Wi-Fi ahead of the USB ethernet profiles..."
@@ -131,7 +166,7 @@ function netmode_wifi {
   _netmode_sudo || return 1
   echo "  Disabling both USB ethernet profiles..."
   sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" off
-  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  _netmode_dedicated_off
   echo "  Wi-Fi only."
   _netmode_show
 }
@@ -143,23 +178,39 @@ function netmode_c7 {
   _netmode_sudo || return 1
   _netmode_check_adapter
   echo "  Switching $NETMODE_USB_DEV to DHCP for the secondary router segment..."
-  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  _netmode_dedicated_off
   sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" on
   sudo networksetup -setdhcp "$NETMODE_USB_SVC"
   echo "  Secondary router answers at $NETMODE_C7_TARGET (web UI + ssh)."
   _netmode_show
 }
 
-# en7 -> directly-cabled device, connected DIRECTLY (no router in between).
-# Only flips which service is enabled - never rewrites the profile. The profile's
-# static IP and router setting are deliberate; leave them as the user set them.
+# en7 -> device A, cabled DIRECTLY (no router in between).
+#
+# These two functions ONLY flip which service is enabled. They never rewrite a
+# profile - that is the entire point of having one per target. If an address here
+# is wrong, fix the PROFILE once, not the code path that selects it.
 function netmode_hinks {
   _netmode_sudo || return 1
   _netmode_check_adapter
-  echo "  Switching $NETMODE_USB_DEV to the direct-connect profile..."
+  echo "  Switching $NETMODE_USB_DEV to '$NETMODE_DEV_A_SVC' ($NETMODE_DEV_A_IP)..."
   sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" off
-  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" on
-  echo "  Controller expected at $NETMODE_HINKS_TARGET"
+  _netmode_dedicated_off
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_DEV_A_SVC" on
+  echo "  Device A expected at $NETMODE_DEV_A_TARGET"
+  _netmode_show
+}
+
+# en7 -> device B, cabled DIRECTLY. Separate profile, separate address: the two
+# links are not interchangeable and one shared profile cannot serve both.
+function netmode_fpp {
+  _netmode_sudo || return 1
+  _netmode_check_adapter
+  echo "  Switching $NETMODE_USB_DEV to '$NETMODE_DEV_B_SVC' ($NETMODE_DEV_B_IP)..."
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" off
+  _netmode_dedicated_off
+  sudo networksetup -setnetworkserviceenabled "$NETMODE_DEV_B_SVC" on
+  echo "  Device B expected at $NETMODE_DEV_B_TARGET"
   _netmode_show
 }
 
@@ -169,7 +220,7 @@ function netmode_lan {
   _netmode_sudo || return 1
   _netmode_check_adapter
   echo "  Switching $NETMODE_USB_DEV to DHCP for the router LAN..."
-  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  _netmode_dedicated_off
   sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" on
   sudo networksetup -setdhcp "$NETMODE_USB_SVC"
   echo "  Wired to the router. Safe to flash firmware from here."
@@ -184,7 +235,7 @@ function netmode_switch {
   _netmode_sudo || return 1
   _netmode_check_adapter
   echo "  Setting $NETMODE_USB_DEV to reach the switch at $NETMODE_SWITCH_TARGET..."
-  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  _netmode_dedicated_off
   sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" on
   sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.0.100 255.255.255.0 "" 2>/dev/null \
     || sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.0.100 255.255.255.0 192.168.0.100
@@ -201,7 +252,7 @@ function netmode_tftp {
   _netmode_sudo || return 1
   _netmode_check_adapter
   echo "  Setting $NETMODE_USB_DEV to the C7 TFTP recovery address (192.168.0.66)..."
-  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  _netmode_dedicated_off
   sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" on
   sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.0.66 255.255.255.0 "" 2>/dev/null \
     || sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.0.66 255.255.255.0 192.168.0.66
@@ -214,7 +265,7 @@ function netmode_owrt {
   _netmode_sudo || return 1
   _netmode_check_adapter
   echo "  Setting $NETMODE_USB_DEV to reach fresh OpenWrt at 192.168.1.1..."
-  sudo networksetup -setnetworkserviceenabled "$NETMODE_HINKS_SVC" off
+  _netmode_dedicated_off
   sudo networksetup -setnetworkserviceenabled "$NETMODE_USB_SVC" on
   sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.1.100 255.255.255.0 "" 2>/dev/null \
     || sudo networksetup -setmanual "$NETMODE_USB_SVC" 192.168.1.100 255.255.255.0 192.168.1.100
@@ -229,6 +280,7 @@ function netmode {
     wifi)           netmode_wifi ;;
     c7)             netmode_c7 ;;
     hinks|hinkspix) netmode_hinks ;;
+    fpp|player)     netmode_fpp ;;
     lan|router)     netmode_lan ;;
     switch|sw)      netmode_switch ;;
     tftp|recovery)  netmode_tftp ;;
@@ -246,9 +298,12 @@ MESSAGE=`cat <<HEREDOC_MESSAGE
     netmode status    Show profiles, service order and default route (read-only)
     netmode harden    One-time fix: stop USB ethernet stealing the default route
                       from Wi-Fi. Idempotent - re-run after macOS updates.
-    netmode wifi      Wi-Fi only, both USB profiles disabled
+    netmode wifi      Wi-Fi only, every USB profile disabled
     netmode c7        en7 -> secondary router segment via DHCP (C7 is at $NETMODE_C7_TARGET)
-    netmode hinks     en7 -> static $NETMODE_HINKS_IP (controller at $NETMODE_HINKS_TARGET)
+    netmode hinks     en7 -> '$NETMODE_DEV_A_SVC': static $NETMODE_DEV_A_IP,
+                      for device A directly cabled at $NETMODE_DEV_A_TARGET
+    netmode fpp       en7 -> '$NETMODE_DEV_B_SVC': static $NETMODE_DEV_B_IP,
+                      for device B directly cabled at $NETMODE_DEV_B_TARGET
     netmode lan       en7 -> main router LAN via DHCP (use this to flash firmware)
     netmode switch    en7 -> 192.168.0.100 reach managed switch at its default 192.168.0.1
     netmode tftp      en7 -> 192.168.0.66  C7 TFTP recovery / un-brick
@@ -261,8 +316,14 @@ MESSAGE=`cat <<HEREDOC_MESSAGE
   'netmode harden' fixes it by ranking Wi-Fi first - service order is the whole
   fix. It does NOT modify either profile's IP configuration.
 
-  CAUTION: <alt-subnet> is the direct-connect link. <main-subnet> is the main LAN.
-           71 vs 17 - easy to transpose.
+  CAUTION: the direct-connect links and the main LAN use similar-looking
+           subnets - one transposed digit sends you nowhere. Check 'netmode
+           status' before concluding a device is dead.
+
+  ONE PROFILE PER TARGET: 'hinks' and 'fpp' each own a profile that is never
+  rewritten by these functions. Do not collapse them back into one shared slot
+  that gets retyped per use - a single slot serving two devices is wrong for one
+  of them at all times, and its stored values do not record which.
 
   Other functions in this file:
     scanports <host>  Scan all 65535 TCP ports on a host

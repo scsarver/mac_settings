@@ -14,6 +14,18 @@ NETMODE_SWITCH_TARGET="192.168.0.1"    # managed switch
 NETMODE_C7_TARGET="192.168.0.1"        # secondary router / AP
 NETMODE_C7_MASK="255.255.255.0"
 
-NETMODE_HINKS_IP="192.168.0.219"       # this Mac, when directly cabled to a device
-NETMODE_HINKS_MASK="255.255.255.0"
-NETMODE_HINKS_TARGET="192.168.0.217"   # that device
+# ONE PROFILE PER DIRECTLY-CABLED DEVICE. The service names must match the macOS
+# network services exactly — 'netmode' only enables and disables them, it never
+# rewrites their IP configuration.
+#
+# Do NOT point both of these at one shared profile you retype per use: a single
+# slot serving two devices is wrong for one of them at all times, and its saved
+# values do not record which device it was last aimed at.
+
+NETMODE_DEV_A_SVC="Direct connect 1"   # macOS service name, device A
+NETMODE_DEV_A_IP="192.168.0.219"       # this Mac's address on the A link
+NETMODE_DEV_A_TARGET="192.168.0.215"   # device A itself
+
+NETMODE_DEV_B_SVC="Direct connect 2"   # macOS service name, device B
+NETMODE_DEV_B_IP="192.168.0.220"       # this Mac's address on the B link
+NETMODE_DEV_B_TARGET="192.168.0.217"   # device B itself
