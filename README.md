@@ -9,6 +9,13 @@ When starting a brand new setup (Written for MacOSX Monterey 12.3.1) it is usefu
 - Checkout this project scsarver/mac_settings
 - Navigate to the scsarver/mac_settings/home directory
 - Copy the .bash_profile to your home directory and source the file in your terminal.
+  - **This is not a one-time step.** `home/.bash_profile` in this repo is the source of truth;
+    `~/.bash_profile` is a plain, disconnected copy (not a symlink) that only updates when
+    someone copies it again. Editing `~/.bash_profile` directly instead of the repo file gets
+    silently overwritten and lost the next time someone deploys. Use `bpcp` (copy) or `bpcps`
+    (copy + source) — both defined in this file — to redeploy after any edit. `home/.functions/*`
+    files need no such step: `.bash_profile` sources them straight from
+    `$MAC_SETTINGS_HOME/.functions/`, which points at this repo, not a copy.
 - Copy the .vimrc to your home directory.
 - Navigate to the scsarver/mac_settings/setup directory
 - Ensure Homebrew is installed
