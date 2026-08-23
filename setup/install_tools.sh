@@ -25,6 +25,7 @@ homebrew_packages=(
   'qrencode'
   'bash-completion'
   'shellcheck'
+  'git-filter-repo' # Rewrite git history (replaces the deprecated filter-branch)
   'icdiff'
   'node'
   'python'
