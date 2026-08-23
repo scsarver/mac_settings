@@ -1,0 +1,66 @@
+# =============================================================================
+# ntwork - one command to get a Claude Code session into an isolated git
+#          worktree instead of the repo's shared main working directory
+#
+# WHY THIS EXISTS:
+#   Running multiple Claude Code sessions against the same repo at once is
+#   normal (a laptop terminal plus a phone/cloud session, two tabs, etc.), and
+#   nothing about starting a session automatically isolates it - a session's
+#   working directory is fixed the instant it launches, before any project
+#   instructions are even read. So two sessions with uncommitted edits can
+#   collide by writing to the SAME files in the SAME directory before either
+#   commits. That already happened here once (2026-08-22: a concurrent
+#   session's `git reset --hard` destroyed six uncommitted edits belonging to
+#   another session).
+#
+#   Repos that want this isolated need their own ./scripts/worktree.sh (see
+#   network-topology's, added 2026-08-22/23) - a per-issue git worktree, so
+#   each session gets its own working directory and branch, with an enforced
+#   sync-before-merge rule so reconciliation happens on purpose, not by
+#   accident mid-edit.
+#
+#   ntwork is the missing last step: worktree.sh still has to be run BEFORE
+#   the session that will do the work starts, by whoever launches it - no
+#   rule inside the repo can reach back and do that, because the working
+#   directory is already fixed by the time any of the repo's own instructions
+#   load. Doing it by hand is three steps (create/reuse the worktree, cd into
+#   it, launch claude) easy to skip out of habit. ntwork makes it one.
+#
+# WHAT THIS DELIBERATELY DOES NOT DO:
+#   - Does not know anything about network-topology specifically. It works
+#     against whatever repo you're standing in, as long as it has an
+#     executable ./scripts/worktree.sh with start/path subcommands. No
+#     site-specific values here - safe for this repo being public.
+#   - Does not launch claude for you if it can't resolve a worktree path -
+#     fails loudly instead of guessing.
+#   - Does not do anything to finish/merge the work. That's still
+#     ./scripts/worktree.sh finish <name>, run from wherever - a fix shipped
+#     alongside this makes worktree.sh resolve the true repo root correctly
+#     regardless of whether you run it from the main checkout or a worktree.
+# =============================================================================
+
+function ntwork {
+  local target="$1"
+  if [ -z "$target" ]; then
+    echo "usage: ntwork <issue-number-or-name>   (run from inside a repo with ./scripts/worktree.sh)" >&2
+    return 2
+  fi
+  if [ ! -x ./scripts/worktree.sh ]; then
+    echo "no executable ./scripts/worktree.sh in $(pwd) - ntwork only works in a repo that has one" >&2
+    return 1
+  fi
+
+  # Create it if new; harmless (and expected) if it already exists - either way we just want
+  # its path next. worktree.sh itself is the one place that knows the name -> branch rule.
+  ./scripts/worktree.sh start "$target" >/dev/null 2>&1
+
+  local dest
+  dest="$(./scripts/worktree.sh path "$target" 2>/dev/null)"
+  if [ -z "$dest" ] || [ ! -d "$dest" ]; then
+    echo "could not resolve a worktree for '$target' - try ./scripts/worktree.sh list" >&2
+    return 1
+  fi
+
+  echo "-> $dest"
+  ( cd "$dest" && claude )
+}

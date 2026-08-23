@@ -165,6 +165,7 @@ Functions:
   getoathtkn
   netmode      - switch the USB-C ethernet adapter between C7 / HinksPix / router LAN
   nethelp      - help for netmode and the other network functions
+  ntwork       - launch Claude Code in an isolated git worktree (repo needs ./scripts/worktree.sh)
 
 Loaded Function Files:
 HEREDOC_MESSAGE
