@@ -54,6 +54,20 @@
 #      worktrees on that same issue N - decided so the branch name alone says what it relates to,
 #      no need to go read git log to disambiguate a reused name).
 #
+# EXTENDED 2026-08-23 (a third time): a message meant for Claude got typed straight at the
+#   ntwork prompt and the input split before the whole sentence arrived - the shell only ever
+#   saw one word ("is") as $1. That is a normal, single-space-free-token call, so ntwork did
+#   exactly what it's documented to do: took "is" as an explicit target, created/opened a
+#   worktree for it, and launched claude with NO message (the single-token branch never had a
+#   query to forward). The bug was that this was completely silent - nothing printed before
+#   claude launched to show that no message had been captured, so a mis-split paste produced a
+#   real new worktree/branch named after a stray word and an empty chat, with no warning.
+#   Fixed: both branches now echo what they resolved to - the message text if one was captured,
+#   or an explicit "no first message captured" line if not - right before claude launches. This
+#   does NOT try to guess whether a lone word "looks like" a real issue name (see the non-goals
+#   below - deliberately not ntwork's job); it only makes visible the decision ntwork already
+#   made, so a split paste shows up as a line of output instead of a silent empty session.
+#
 # WHAT THIS DELIBERATELY DOES NOT DO:
 #   - Does not know anything about network-topology specifically. It works
 #     against whatever repo you're standing in, as long as it has an
@@ -146,8 +160,10 @@ function ntwork {
 
   echo "-> $dest"
   if [ -n "$query" ]; then
+    echo "-> first message: $query"
     ( cd "$dest" && claude "$query" )
   else
+    echo "-> no first message captured -- claude opens with an empty prompt"
     ( cd "$dest" && claude )
   fi
 }
