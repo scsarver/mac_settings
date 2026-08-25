@@ -68,6 +68,19 @@
 #   below - deliberately not ntwork's job); it only makes visible the decision ntwork already
 #   made, so a split paste shows up as a line of output instead of a silent empty session.
 #
+# EXTENDED 2026-08-25: `ntwork usage` (no leading dash) was typed expecting the help text - by
+#   analogy with the bare-word verbs (`ntwork sync 68`, `ntwork finish 68` need no dash either) -
+#   and instead hit the single-space-free-token branch, creating and opening a real worktree
+#   named "usage". Same incident, separate mechanism, also created stray "sync"/"finish"
+#   worktrees when `ntwork sync 68` / `ntwork finish sync` were typed in a shell that still had a
+#   PRE-2026-08-23 copy of this function loaded (functions load once at shell start; editing this
+#   file does not reach an already-running shell - open a new terminal, or re-source, to pick up
+#   any fix here). Fixed the reachable part: `help`/`usage` (bare, no dash) now join
+#   `-h`/`--help`/`--usage` as reserved keywords, same treatment already given to `list`/`sync`/
+#   `finish`/`drop`/`path`/`next-number`/`next-round` - not new "guess if a word looks like an
+#   issue name" behavior (still refused, see non-goals below), just two more literal reserved
+#   words alongside the seven that already exist.
+#
 # WHAT THIS DELIBERATELY DOES NOT DO:
 #   - Does not know anything about network-topology specifically. It works
 #     against whatever repo you're standing in, as long as it has an
@@ -83,14 +96,14 @@
 
 function ntwork {
   case "${1:-}" in
-    -h|--help|--usage)
+    -h|--help|--usage|help|usage)
       echo "usage: ntwork <issue-number-or-name>              launch claude in that worktree"
       echo "       ntwork <issue-number> <first message...>  open/resume THAT issue's worktree,"
       echo "                                                  claude's first message is the rest"
       echo "       ntwork <a free-text description, no leading number>   auto-number NEW work,"
       echo "                                                  claude's first message is all of it"
       echo "       ntwork list|sync|finish|drop|path|next-number|next-round [name]   forwarded to ./scripts/worktree.sh"
-      echo "       ntwork -h|--help|--usage              show this"
+      echo "       ntwork -h|--help|--usage|help|usage   show this"
       echo "  (run from inside a repo with an executable ./scripts/worktree.sh)"
       # Pulled live from the target repo's own script, not copied here, so this can't drift out
       # of sync with what worktree.sh actually does - see the file header for why that matters.
@@ -106,7 +119,7 @@ function ntwork {
     echo "       ntwork <issue-number> <first message...>  open/resume THAT issue, rest is the first message" >&2
     echo "       ntwork <a free-text description, no leading number>   auto-number NEW work" >&2
     echo "       ntwork list|sync|finish|drop|path|next-number|next-round [name]   forwarded to ./scripts/worktree.sh" >&2
-    echo "       ntwork -h|--help|--usage              show this, with worktree.sh's own reference" >&2
+    echo "       ntwork -h|--help|--usage|help|usage   show this, with worktree.sh's own reference" >&2
     return 2
   fi
   if [ ! -x ./scripts/worktree.sh ]; then
